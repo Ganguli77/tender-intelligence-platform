@@ -12,7 +12,13 @@ export async function register(userData) {
   return response.data;
 }
 
+export async function loginWithGoogle(token) {
+  const response = await api.post(`${AUTH_BASE_URL}/google`, { token });
+  return response.data;
+}
+
 export default {
   login,
+  loginWithGoogle,
   register,
 };

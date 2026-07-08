@@ -1,10 +1,11 @@
+import { useGoogleLogin } from "@react-oauth/google";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Loader from "../../components/common/Loader";
 import { useAuth } from "../../context/useAuth";
 import { getApiErrorMessage } from "../../services/api";
-import { login as loginRequest } from "../../services/authService";
+import { login as loginRequest, loginWithGoogle } from "../../services/authService";
 import "./Login.css";
 
 const initialForm = {
@@ -19,12 +20,13 @@ export default function Login() {
   const [form, setForm] = useState(initialForm);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
 
   const redirectTo = location.state?.from?.pathname || "/dashboard";
   const isSubmitDisabled = useMemo(
-    () => loading || !form.identifier.trim() || !form.password,
-    [form.identifier, form.password, loading],
+    () => loading || googleLoading || !form.identifier.trim() || !form.password,
+    [form.identifier, form.password, googleLoading, loading],
   );
 
   useEffect(() => {
@@ -33,10 +35,56 @@ export default function Login() {
     }
   }, [isAuthenticated, navigate, redirectTo]);
 
+  const completeLogin = (data, fallbackUsername) => {
+    if (!data?.token) {
+      throw new Error("Login succeeded but no JWT token was returned.");
+    }
+
+    login({
+      token: data.token,
+      username: data.username || fallbackUsername,
+      role: data.role || "USER",
+    });
+    navigate(redirectTo, { replace: true });
+  };
+
+  const googleLogin = useGoogleLogin({
+    flow: "implicit",
+    scope: "openid email profile",
+    onSuccess: async (tokenResponse) => {
+      setGoogleLoading(true);
+      setError("");
+
+      try {
+        const googleToken = tokenResponse.access_token || tokenResponse.credential;
+        if (!googleToken) {
+          throw new Error("Google did not return an access token.");
+        }
+
+        const data = await loginWithGoogle(googleToken);
+        completeLogin(data, data?.username || "Google user");
+      } catch (err) {
+        setError(getApiErrorMessage(err, "Unable to sign in with Google. Please try again."));
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    onError: () => {
+      setGoogleLoading(false);
+      setError("Google sign-in was cancelled or failed. Please try again.");
+    },
+  });
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
     setError("");
+  };
+
+  const handleGoogleLogin = () => {
+    setError("");
+    setGoogleLoading(true);
+    googleLogin();
   };
 
   const handleSubmit = async (event) => {
@@ -55,16 +103,7 @@ export default function Login() {
         password: form.password,
       });
 
-      if (!data?.token) {
-        throw new Error("Login succeeded but no JWT token was returned.");
-      }
-
-      login({
-        token: data.token,
-        username: data.username || identifier,
-        role: data.role || "USER",
-      });
-      navigate(redirectTo, { replace: true });
+      completeLogin(data, identifier);
     } catch (err) {
       setError(getApiErrorMessage(err, "Unable to sign in. Please check your credentials."));
     } finally {
@@ -94,8 +133,26 @@ export default function Login() {
             </span>
             <div>
               <h2 id="login-title">Sign in</h2>
-              <p>Use your email or username to continue.</p>
+              <p>Use your email, username, or Google account to continue.</p>
             </div>
+          </div>
+
+          <button
+            className="auth-google-button"
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={loading || googleLoading}
+          >
+            {googleLoading ? (
+              <Loader size="sm" label="Signing in with Google" />
+            ) : (
+              <span className="auth-google-icon" aria-hidden="true">G</span>
+            )}
+            {googleLoading ? "Connecting Google..." : "Continue with Google"}
+          </button>
+
+          <div className="auth-divider">
+            <span>or continue with email</span>
           </div>
 
           <label className="auth-field">
