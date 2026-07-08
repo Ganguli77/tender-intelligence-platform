@@ -13,6 +13,61 @@ const initialForm = {
   password: "",
 };
 
+const isGoogleConfigured = Boolean(import.meta.env.VITE_GOOGLE_CLIENT_ID);
+
+function GoogleLoginButton({ disabled, onComplete, onError }) {
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const googleLogin = useGoogleLogin({
+    flow: "implicit",
+    scope: "openid email profile",
+    onSuccess: async (tokenResponse) => {
+      setGoogleLoading(true);
+      onError("");
+
+      try {
+        const googleToken = tokenResponse.access_token || tokenResponse.credential;
+        if (!googleToken) {
+          throw new Error("Google did not return an access token.");
+        }
+
+        const data = await loginWithGoogle(googleToken);
+        onComplete(data, data?.username || "Google user");
+      } catch (err) {
+        onError(getApiErrorMessage(err, "Unable to sign in with Google. Please try again."));
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    onError: () => {
+      setGoogleLoading(false);
+      onError("Google sign-in was cancelled or failed. Please try again.");
+    },
+  });
+
+  const handleGoogleLogin = () => {
+    onError("");
+    setGoogleLoading(true);
+    googleLogin();
+  };
+
+  return (
+    <button
+      className="auth-google-button"
+      type="button"
+      onClick={handleGoogleLogin}
+      disabled={disabled || googleLoading}
+    >
+      {googleLoading ? (
+        <Loader size="sm" label="Signing in with Google" />
+      ) : (
+        <span className="auth-google-icon" aria-hidden="true">G</span>
+      )}
+      {googleLoading ? "Connecting Google..." : "Continue with Google"}
+    </button>
+  );
+}
+
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,13 +75,12 @@ export default function Login() {
   const [form, setForm] = useState(initialForm);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
 
   const redirectTo = location.state?.from?.pathname || "/dashboard";
   const isSubmitDisabled = useMemo(
-    () => loading || googleLoading || !form.identifier.trim() || !form.password,
-    [form.identifier, form.password, googleLoading, loading],
+    () => loading || !form.identifier.trim() || !form.password,
+    [form.identifier, form.password, loading],
   );
 
   useEffect(() => {
@@ -48,43 +102,10 @@ export default function Login() {
     navigate(redirectTo, { replace: true });
   };
 
-  const googleLogin = useGoogleLogin({
-    flow: "implicit",
-    scope: "openid email profile",
-    onSuccess: async (tokenResponse) => {
-      setGoogleLoading(true);
-      setError("");
-
-      try {
-        const googleToken = tokenResponse.access_token || tokenResponse.credential;
-        if (!googleToken) {
-          throw new Error("Google did not return an access token.");
-        }
-
-        const data = await loginWithGoogle(googleToken);
-        completeLogin(data, data?.username || "Google user");
-      } catch (err) {
-        setError(getApiErrorMessage(err, "Unable to sign in with Google. Please try again."));
-      } finally {
-        setGoogleLoading(false);
-      }
-    },
-    onError: () => {
-      setGoogleLoading(false);
-      setError("Google sign-in was cancelled or failed. Please try again.");
-    },
-  });
-
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
     setError("");
-  };
-
-  const handleGoogleLogin = () => {
-    setError("");
-    setGoogleLoading(true);
-    googleLogin();
   };
 
   const handleSubmit = async (event) => {
@@ -137,23 +158,14 @@ export default function Login() {
             </div>
           </div>
 
-          <button
-            className="auth-google-button"
-            type="button"
-            onClick={handleGoogleLogin}
-            disabled={loading || googleLoading}
-          >
-            {googleLoading ? (
-              <Loader size="sm" label="Signing in with Google" />
-            ) : (
-              <span className="auth-google-icon" aria-hidden="true">G</span>
-            )}
-            {googleLoading ? "Connecting Google..." : "Continue with Google"}
-          </button>
-
-          <div className="auth-divider">
-            <span>or continue with email</span>
-          </div>
+          {isGoogleConfigured ? (
+            <>
+              <GoogleLoginButton disabled={loading} onComplete={completeLogin} onError={setError} />
+              <div className="auth-divider">
+                <span>or continue with email</span>
+              </div>
+            </>
+          ) : null}
 
           <label className="auth-field">
             <span>Email or Username</span>
