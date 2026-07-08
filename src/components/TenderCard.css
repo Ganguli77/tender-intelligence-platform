@@ -1,0 +1,114 @@
+.tender-summary-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  width: 100%;
+  min-height: 154px;
+  padding: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 8px;
+  color: #f8fafc;
+  background:
+    linear-gradient(145deg, rgba(15, 23, 42, 0.92), rgba(2, 6, 23, 0.96)),
+    radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.14), transparent 34%);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease;
+}
+
+.tender-summary-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.48);
+  box-shadow:
+    0 22px 56px rgba(0, 0, 0, 0.34),
+    0 0 32px rgba(59, 130, 246, 0.16);
+}
+
+.tender-summary-accent {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: #3b82f6;
+  box-shadow: 0 0 24px rgba(59, 130, 246, 0.9);
+}
+
+.tender-summary-body {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tender-summary-org,
+.tender-summary-footer,
+.tender-summary-link {
+  display: inline-flex;
+  align-items: center;
+}
+
+.tender-summary-org {
+  gap: 8px;
+  color: #93c5fd;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.tender-summary-card strong {
+  color: #ffffff;
+  font-size: 1.08rem;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.tender-summary-description {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #94a3b8;
+  line-height: 1.6;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.tender-summary-footer {
+  align-self: stretch;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 190px;
+  color: #cbd5e1;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.tender-summary-footer > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tender-summary-footer svg {
+  color: #3b82f6;
+  flex: 0 0 auto;
+}
+
+.tender-summary-link {
+  color: #ffffff;
+}
+
+@media (max-width: 720px) {
+  .tender-summary-card {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 18px;
+  }
+
+  .tender-summary-footer {
+    align-self: auto;
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+}

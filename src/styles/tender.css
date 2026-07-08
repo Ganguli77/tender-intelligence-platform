@@ -1,0 +1,71 @@
+body {
+  background: #050505;
+  font-family: Arial, sans-serif;
+}
+
+.card {
+  background: #0d0d0d;
+  color: #ffffff;
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  box-shadow: 0 18px 46px rgba(0,0,0,0.26);
+  transition: 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.badge {
+  background: #101a33;
+  color: white;
+  border: 1px solid rgba(59, 130, 246, 0.32);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.org {
+  margin: 10px 0;
+  color: #b3b3b3;
+}
+
+.desc {
+  color: #b3b3b3;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin: 10px 0;
+  color: #dbeafe;
+}
+
+.btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background: #101a33;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #16213e;
+}

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="260" viewBox="0 0 920 260" role="img" aria-labelledby="title desc">
+  <title id="title">NexTender AI logo</title>
+  <desc id="desc">Premium NexTender AI monogram and wordmark on matte black.</desc>
+  <defs>
+    <linearGradient id="nt-gradient" x1="36" y1="40" x2="170" y2="174" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="text-gradient" x1="420" y1="72" x2="498" y2="142" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+    <clipPath id="mark-clip">
+      <rect x="28" y="28" width="164" height="164" rx="34"/>
+    </clipPath>
+  </defs>
+
+  <rect width="920" height="260" fill="#0B0F19"/>
+
+  <g clip-path="url(#mark-clip)">
+    <rect x="28" y="28" width="164" height="164" rx="34" fill="#101727"/>
+
+    <path fill="url(#nt-gradient)" d="M59 57C59 53.686 61.686 51 65 51H156C159.314 51 162 53.686 162 57V78C162 81.314 159.314 84 156 84H127V162C127 165.314 124.314 168 121 168H99C95.686 168 93 165.314 93 162V84H65C61.686 84 59 81.314 59 78V57Z"/>
+
+    <path fill="#0B0F19" d="M83 153L113 83H128L98 153H83Z"/>
+    <path fill="#0B0F19" d="M68 91H83V153H68V91Z"/>
+    <path fill="#0B0F19" d="M127 96H142V153H127V96Z"/>
+
+    <path fill="url(#nt-gradient)" d="M75 154H88L121 77H108L75 154Z" opacity=".96"/>
+    <rect x="144" y="96" width="12" height="5" rx="1.5" fill="#7C3AED"/>
+    <rect x="135" y="113" width="18" height="5" rx="1.5" fill="#5B6EF0"/>
+    <rect x="145" y="130" width="9" height="9" rx="2" fill="#3B82F6"/>
+    <path d="M64 173H155" stroke="#2F3A52" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <text x="238" y="121" fill="#FFFFFF" font-family="Inter, Manrope, Satoshi, Arial, sans-serif" font-size="70" font-weight="760" letter-spacing="-1">
+    Nex
+  </text>
+  <text x="360" y="121" fill="url(#text-gradient)" font-family="Inter, Manrope, Satoshi, Arial, sans-serif" font-size="70" font-weight="820" letter-spacing="-1">
+    T
+  </text>
+  <text x="403" y="121" fill="#FFFFFF" font-family="Inter, Manrope, Satoshi, Arial, sans-serif" font-size="70" font-weight="760" letter-spacing="-1">
+    ender AI
+  </text>
+
+  <text x="241" y="165" fill="#98A2B3" font-family="Inter, Manrope, Satoshi, Arial, sans-serif" font-size="17" font-weight="360" letter-spacing="5.2">
+    AI-POWERED TENDER INTELLIGENCE
+  </text>
+</svg>
