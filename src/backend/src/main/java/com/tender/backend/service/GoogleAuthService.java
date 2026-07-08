@@ -22,7 +22,7 @@ public class GoogleAuthService {
     public GoogleAuthService(
             UserRepository userRepository,
             BCryptPasswordEncoder passwordEncoder,
-            @Value("${spring.security.oauth2.client.registration.google.client-id:}") String googleClientId
+            @Value("${app.google.client-id:}") String googleClientId
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
