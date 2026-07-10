@@ -1,2 +1,2 @@
-// Keeps the legacy /tenders page entry pointed at the full TenderList marketplace page.
-export { default } from "./TenderList";
+// Keeps the legacy page entry pointed at the Phase 4 marketplace.
+export { default } from "./Tenders/Tenders";

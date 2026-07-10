@@ -1,0 +1,536 @@
+.tenders-page {
+  min-height: calc(100vh - var(--navbar-height));
+  background:
+    radial-gradient(circle at 18% 4%, color-mix(in srgb, var(--color-primary) 15%, transparent), transparent 24rem),
+    radial-gradient(circle at 84% 10%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 22rem),
+    var(--color-bg);
+}
+
+.tenders-shell {
+  width: min(100% - 2rem, 1380px);
+  margin: 0 auto;
+  padding: var(--space-10) 0 var(--space-12);
+}
+
+.tenders-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(20rem, 0.48fr);
+  gap: var(--space-8);
+  align-items: end;
+  padding: var(--space-8) 0;
+}
+
+.tenders-eyebrow {
+  display: inline-flex;
+  margin-bottom: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 34%, var(--color-border));
+  border-radius: 999px;
+  padding: 0.46rem 0.78rem;
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 850;
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+.tenders-hero h1 {
+  max-width: 780px;
+  margin: 0;
+  color: var(--color-text);
+  font-size: clamp(2.35rem, 5vw, 4.7rem);
+  font-weight: 900;
+  line-height: 0.98;
+}
+
+.tenders-hero p {
+  max-width: 720px;
+  margin: var(--space-5) 0 0;
+  color: var(--color-text-muted);
+  font-size: clamp(1rem, 1rem + 0.28vw, 1.18rem);
+  line-height: 1.8;
+}
+
+.tenders-hero__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.tenders-hero__stats article,
+.tenders-toolbar,
+.tenders-alert,
+.tenders-results__head,
+.tenders-empty {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-soft);
+  box-shadow: 0 18px 46px color-mix(in srgb, var(--color-shadow) 52%, transparent);
+}
+
+.tenders-hero__stats article {
+  display: grid;
+  gap: 0.35rem;
+  padding: var(--space-4);
+}
+
+.tenders-hero__stats strong {
+  color: var(--color-text);
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.tenders-hero__stats span {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 760;
+}
+
+.tenders-toolbar {
+  display: grid;
+  grid-template-columns: minmax(18rem, 1fr) auto;
+  gap: var(--space-4);
+  align-items: center;
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+}
+
+.tenders-search,
+.tenders-sort,
+.tenders-filter-group {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.tenders-search {
+  position: relative;
+}
+
+.tenders-search svg {
+  position: absolute;
+  top: 50%;
+  left: var(--space-4);
+  color: var(--color-text-muted);
+  transform: translateY(-50%);
+}
+
+.tenders-search input {
+  width: 100%;
+  min-height: 3.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-4) 0 3rem;
+  color: var(--color-text);
+  background: var(--color-bg-elevated);
+  outline: 0;
+}
+
+.tenders-search input:focus,
+.tenders-sort select:focus,
+.tenders-filter-group input:focus,
+.tenders-filter-group select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
+}
+
+.tenders-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.tenders-filter-toggle,
+.tenders-tablet-toggle,
+.tenders-reset {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-4);
+  color: var(--color-text);
+  font-weight: 780;
+  background: var(--color-bg-elevated);
+  cursor: pointer;
+}
+
+.tenders-filter-toggle {
+  display: none;
+}
+
+.tenders-tablet-toggle:hover,
+.tenders-filter-toggle:hover,
+.tenders-reset:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+  color: var(--color-primary);
+}
+
+.tenders-sort {
+  position: relative;
+  min-width: 13.5rem;
+}
+
+.tenders-sort svg {
+  position: absolute;
+  top: 50%;
+  left: var(--space-4);
+  color: var(--color-text-muted);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.tenders-sort select {
+  width: 100%;
+  min-height: 3rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0 1rem 0 2.8rem;
+  color: var(--color-text);
+  background: var(--color-bg-elevated);
+  outline: 0;
+}
+
+.tenders-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  color: #b45309;
+  background: color-mix(in srgb, #f59e0b 13%, var(--color-surface-soft));
+}
+
+.tenders-layout {
+  display: grid;
+  grid-template-columns: 19.5rem minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.tenders-sidebar {
+  position: sticky;
+  top: calc(var(--navbar-height) + var(--space-5));
+}
+
+.tenders-filters {
+  display: grid;
+  gap: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-5);
+  background: color-mix(in srgb, var(--color-surface-soft) 94%, var(--color-bg));
+  box-shadow: 0 18px 46px color-mix(in srgb, var(--color-shadow) 52%, transparent);
+}
+
+.tenders-filters__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tenders-filters__header div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.tenders-filters__header span {
+  color: var(--color-primary);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.tenders-filters__header strong {
+  color: var(--color-text);
+  font-size: 1.05rem;
+}
+
+.tenders-filters__close {
+  display: none;
+  width: 2.2rem;
+  height: 2.2rem;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  background: var(--color-bg-elevated);
+  cursor: pointer;
+}
+
+.tenders-filter-group label {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.tenders-filter-group input,
+.tenders-filter-group select {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0 0.82rem;
+  color: var(--color-text);
+  background: var(--color-bg-elevated);
+  outline: 0;
+}
+
+.tenders-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.tenders-results {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.tenders-results__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+}
+
+.tenders-results__head div {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.tenders-results__head span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 760;
+}
+
+.tenders-results__head strong {
+  color: var(--color-text);
+  font-size: 1.08rem;
+}
+
+.tenders-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.tender-skeleton {
+  display: grid;
+  gap: var(--space-4);
+  min-height: 27rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-5);
+  background: var(--color-surface-soft);
+  box-shadow: 0 18px 46px color-mix(in srgb, var(--color-shadow) 48%, transparent);
+}
+
+.tender-skeleton span,
+.tender-skeleton strong,
+.tender-skeleton p,
+.tender-skeleton div {
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-border) 54%, transparent),
+    color-mix(in srgb, var(--color-primary) 14%, transparent),
+    color-mix(in srgb, var(--color-border) 54%, transparent)
+  );
+  background-size: 220% 100%;
+  animation: tender-skeleton 1.35s ease-in-out infinite;
+}
+
+.tender-skeleton span {
+  width: 45%;
+  height: 1.6rem;
+}
+
+.tender-skeleton strong {
+  width: 92%;
+  height: 4rem;
+}
+
+.tender-skeleton p {
+  width: 100%;
+  height: 3rem;
+}
+
+.tender-skeleton div {
+  height: 3.1rem;
+  margin-top: auto;
+}
+
+.tenders-empty {
+  display: grid;
+  min-height: 24rem;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.tenders-empty svg {
+  color: var(--color-primary);
+}
+
+.tenders-empty h2 {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.tenders-empty p {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}
+
+.tenders-reset--center {
+  margin-top: var(--space-2);
+}
+
+.tenders-drawer {
+  display: none;
+}
+
+@keyframes tender-skeleton {
+  from {
+    background-position: 120% 0;
+  }
+
+  to {
+    background-position: -120% 0;
+  }
+}
+
+@media (max-width: 1120px) {
+  .tenders-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .tenders-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tenders-sidebar {
+    position: static;
+  }
+
+  .tenders-sidebar--collapsed {
+    display: none;
+  }
+
+  .tenders-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .tenders-shell {
+    width: min(100% - 1.25rem, 1380px);
+    padding-top: var(--space-6);
+  }
+
+  .tenders-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .tenders-toolbar__actions {
+    justify-content: stretch;
+  }
+
+  .tenders-sort,
+  .tenders-tablet-toggle,
+  .tenders-filter-toggle {
+    flex: 1 1 12rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .tenders-hero {
+    padding-top: var(--space-5);
+  }
+
+  .tenders-hero__stats {
+    grid-template-columns: 1fr;
+  }
+
+  .tenders-tablet-toggle,
+  .tenders-sidebar {
+    display: none;
+  }
+
+  .tenders-filter-toggle {
+    display: inline-flex;
+  }
+
+  .tenders-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tenders-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: grid;
+    pointer-events: none;
+  }
+
+  .tenders-drawer--open {
+    pointer-events: auto;
+  }
+
+  .tenders-drawer__backdrop {
+    grid-area: 1 / 1;
+    background: rgba(2, 6, 23, 0);
+  }
+
+  .tenders-drawer--open .tenders-drawer__backdrop {
+    background: rgba(2, 6, 23, 0.62);
+  }
+
+  .tenders-drawer__panel {
+    grid-area: 1 / 1;
+    align-self: end;
+    max-height: min(88vh, 52rem);
+    overflow: auto;
+    transform: translateY(105%);
+    transition: transform 220ms ease;
+  }
+
+  .tenders-drawer--open .tenders-drawer__panel {
+    transform: translateY(0);
+  }
+
+  .tenders-drawer .tenders-filters {
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+  }
+
+  .tenders-drawer .tenders-filters__close {
+    display: grid;
+  }
+}
+
+@media (max-width: 480px) {
+  .tenders-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tenders-toolbar__actions {
+    display: grid;
+  }
+
+  .tenders-sort,
+  .tenders-filter-toggle {
+    width: 100%;
+  }
+}

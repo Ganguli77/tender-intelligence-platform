@@ -13,7 +13,7 @@ import InsightsPage from "./pages/InsightsPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import TenderDetailsPage from "./pages/TenderDetailsPage";
-import TenderListPage from "./pages/TenderListPage";
+import Tenders from "./pages/Tenders/Tenders";
 
 function LegacyTenderRedirect() {
   const { id } = useParams();
@@ -34,7 +34,7 @@ export default function App() {
 
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/tenders" element={<TenderListPage />} />
+                <Route path="/tenders" element={<Tenders />} />
                 <Route path="/tenders/:id" element={<TenderDetailsPage />} />
                 <Route path="/insights" element={<InsightsPage />} />
               </Route>
