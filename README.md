@@ -7,13 +7,14 @@ Full-stack tender intelligence app with a Vite React frontend and Spring Boot ba
 Backend:
 
 ```bash
-cd src/backend
+cd backend
 mvnw.cmd spring-boot:run
 ```
 
 Frontend:
 
 ```bash
+cd frontend
 npm.cmd run dev
 ```
 
@@ -30,8 +31,9 @@ Seeded admin login:
 ## Checks
 
 ```bash
+cd frontend
 npm.cmd run lint
 npm.cmd run build
-cd src/backend
+cd ../backend
 mvnw.cmd test
 ```
