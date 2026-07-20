@@ -1,4 +1,4 @@
-import { LogOut, ShieldCheck, UserRound } from "lucide-react";
+import { Bell, Bookmark, LayoutDashboard, LogOut, Settings, ShieldCheck, UserRound } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
@@ -30,6 +30,12 @@ export default function ProfileDropdown({ onNavigate }) {
     onNavigate?.();
     logout();
     navigate("/");
+  };
+
+  const handleNavigate = (path) => {
+    setOpen(false);
+    onNavigate?.();
+    navigate(path);
   };
 
   if (!user) return null;
@@ -65,6 +71,39 @@ export default function ProfileDropdown({ onNavigate }) {
           <div className={`profile-dropdown__role ${isAdmin ? "is-admin" : ""}`}>
             <ShieldCheck size={15} />
             {isAdmin ? "ADMIN" : "USER"}
+          </div>
+
+          <div className="profile-dropdown__links">
+            <button type="button" role="menuitem" onClick={() => handleNavigate("/dashboard")}>
+              <LayoutDashboard size={16} />
+              Dashboard
+            </button>
+            <button type="button" role="menuitem" onClick={() => handleNavigate("/profile")}>
+              <UserRound size={16} />
+              Profile
+            </button>
+            <button type="button" role="menuitem" onClick={() => handleNavigate("/saved-tenders")}>
+              <Bookmark size={16} />
+              Saved Tenders
+            </button>
+            <button type="button" role="menuitem" onClick={() => handleNavigate("/alerts")}>
+              <Bell size={16} />
+              Alerts
+            </button>
+            <button type="button" role="menuitem" onClick={() => handleNavigate("/notifications")}>
+              <Bell size={16} />
+              Notifications
+            </button>
+            <button type="button" role="menuitem" onClick={() => handleNavigate("/settings")}>
+              <Settings size={16} />
+              Settings
+            </button>
+            {isAdmin ? (
+              <button type="button" role="menuitem" onClick={() => handleNavigate("/admin")}>
+                <ShieldCheck size={16} />
+                Admin Dashboard
+              </button>
+            ) : null}
           </div>
 
           <button className="profile-dropdown__logout" type="button" role="menuitem" onClick={handleLogout}>

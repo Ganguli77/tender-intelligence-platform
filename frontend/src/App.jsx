@@ -14,10 +14,12 @@ import DashboardPage from "./pages/DashboardPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import Notifications from "./pages/Notifications";
 import RegisterPage from "./pages/RegisterPage";
 import SavedTenders from "./pages/SavedTenders";
 import TenderDetails from "./pages/TenderDetails";
 import TenderList from "./pages/TenderList";
+import UserProfile from "./pages/UserProfile";
 
 function LegacyTenderRedirect() {
   const { id } = useParams();
@@ -45,6 +47,9 @@ export default function App() {
                   <Route path="/saved-tenders" element={<SavedTenders />} />
                   <Route path="/alerts" element={<Alerts />} />
                   <Route path="/insights" element={<AIInsights />} />
+                  <Route path="/notifications" element={<Notifications />} />
+                  <Route path="/profile" element={<UserProfile />} />
+                  <Route path="/settings" element={<UserProfile />} />
                 </Route>
 
                 <Route element={<ProtectedRoute role="ADMIN" />}>

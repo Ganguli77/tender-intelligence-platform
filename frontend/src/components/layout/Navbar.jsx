@@ -1,30 +1,26 @@
 import { useEffect, useState } from "react";
-import { Moon, Sun } from "lucide-react";
+import { ArrowRight, Moon, Search, Sun } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import ProfileDropdown from "../ProfileDropdown";
 import { useAuth } from "../../context/useAuth";
 import { useTheme } from "../../context/ThemeContext";
-import { getSavedTenderCount } from "../../api/tenders";
-import { getSavedTenderIds, SAVED_TENDERS_EVENT } from "../../utils/savedTenders";
 
 const publicLinks = [
   { label: "Home", path: "/" },
+  { label: "Features", path: "/#features" },
+  { label: "Marketplace", path: "/tenders" },
+  { label: "AI Insights", path: "/insights" },
+  { label: "Pricing", path: "/#pricing" },
   { label: "About", path: "/about" },
-];
-
-const authenticatedLinks = [
-  { label: "Dashboard", path: "/dashboard" },
-  { label: "Saved Tenders", path: "/saved-tenders" },
-  { label: "Alerts", path: "/alerts" },
+  { label: "Contact", path: "/#contact" },
 ];
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [savedCount, setSavedCount] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 12);
@@ -34,43 +30,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setSavedCount(0);
-      return undefined;
-    }
-
-    let isMounted = true;
-
-    async function loadSavedCount() {
-      try {
-        const count = await getSavedTenderCount();
-        if (isMounted) {
-          setSavedCount(count);
-        }
-      } catch {
-        if (isMounted) {
-          setSavedCount(getSavedTenderIds().length);
-        }
-      }
-    }
-
-    function syncLocalSavedCount() {
-      setSavedCount(getSavedTenderIds().length);
-      loadSavedCount();
-    }
-
-    loadSavedCount();
-    window.addEventListener(SAVED_TENDERS_EVENT, syncLocalSavedCount);
-    window.addEventListener("storage", syncLocalSavedCount);
-
-    return () => {
-      isMounted = false;
-      window.removeEventListener(SAVED_TENDERS_EVENT, syncLocalSavedCount);
-      window.removeEventListener("storage", syncLocalSavedCount);
-    };
-  }, [isAuthenticated]);
-
   const closeMenu = () => setMenuOpen(false);
 
   const handleLogin = () => {
@@ -78,9 +37,7 @@ export default function Navbar() {
     navigate("/login");
   };
 
-  const links = isAuthenticated
-    ? [...publicLinks, { label: "Tenders", path: "/tenders" }, ...authenticatedLinks, { label: "AI Insights", path: "/insights" }, ...(isAdmin ? [{ label: "Admin", path: "/admin" }] : [])]
-    : publicLinks;
+  const links = publicLinks;
 
   return (
     <header className={`site-navbar ${isScrolled ? "is-solid" : ""}`}>
@@ -112,14 +69,23 @@ export default function Navbar() {
                 className={({ isActive }) => (isActive ? "site-nav__link is-active" : "site-nav__link")}
               >
                 {link.label}
-                {link.path === "/saved-tenders" && savedCount > 0 ? (
-                  <span className="site-nav__count">{savedCount}</span>
-                ) : null}
               </NavLink>
             ))}
           </div>
 
           <div className="site-nav__actions">
+            <button
+              className="icon-button"
+              type="button"
+              aria-label="Search tenders"
+              onClick={() => {
+                closeMenu();
+                navigate("/tenders");
+              }}
+            >
+              <Search size={18} />
+            </button>
+
             <button
               className="icon-button"
               type="button"
@@ -132,9 +98,14 @@ export default function Navbar() {
             {isAuthenticated ? (
               <ProfileDropdown onNavigate={closeMenu} />
             ) : (
-              <button className="button button--primary" type="button" onClick={handleLogin}>
-                Login
-              </button>
+              <>
+                <button className="button button--ghost" type="button" onClick={handleLogin}>
+                  Login
+                </button>
+                <button className="button button--primary" type="button" onClick={() => navigate("/register")}>
+                  Get Started <ArrowRight size={16} />
+                </button>
+              </>
             )}
           </div>
         </nav>

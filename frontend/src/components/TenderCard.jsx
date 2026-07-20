@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import {
   Building2,
+  Bookmark,
   ChevronRight,
   Cloud,
   Database,
@@ -9,70 +10,10 @@ import {
   Landmark,
   MapPin,
   Shield,
-  Bookmark,
 } from "lucide-react";
 
+import { calculateDaysLeft, deriveAiScore, formatTenderValue, getMatchLabel, parseTenderDate } from "../utils/tenderDisplay";
 import AIScoreBadge from "./tenders/AIScoreBadge";
-
-function parseDate(value) {
-  const date = value ? new Date(value) : null;
-  return date && !Number.isNaN(date.getTime()) ? date : null;
-}
-
-export function calculateDaysLeft(tender) {
-  const date = parseDate(tender?.deadline || tender?.closingDate);
-  if (!date) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  date.setHours(0, 0, 0, 0);
-  return Math.ceil((date - today) / 86400000);
-}
-
-export function isExpiredTender(tender) {
-  const daysLeft = calculateDaysLeft(tender);
-  return daysLeft !== null && daysLeft < 0;
-}
-
-export function isClosingSoon(tender) {
-  const daysLeft = calculateDaysLeft(tender);
-  return daysLeft !== null && daysLeft >= 0 && daysLeft <= 10;
-}
-
-export function deriveAiScore(tender = {}) {
-  const explicit = Number(tender.aiScore ?? tender.matchScore ?? tender.score);
-  if (Number.isFinite(explicit) && explicit > 0) return Math.min(100, Math.max(0, Math.round(explicit)));
-
-  const value = Number(tender.amountValue || tender.value || 0);
-  const daysLeft = calculateDaysLeft(tender);
-  let score = 58;
-  if (value >= 200000000) score += 18;
-  else if (value >= 80000000) score += 12;
-  else if (value >= 25000000) score += 7;
-  if (daysLeft === null) score += 4;
-  else if (daysLeft >= 20) score += 15;
-  else if (daysLeft >= 7) score += 9;
-  else if (daysLeft >= 0) score += 1;
-  else score -= 24;
-  score += String(tender.category || "").length % 8;
-  return Math.min(96, Math.max(42, score));
-}
-
-export function getMatchLabel(score) {
-  if (score >= 80) return "High Match";
-  if (score >= 60) return "Medium Match";
-  return "Low Match";
-}
-
-export function formatTenderValue(tender = {}) {
-  if (tender.amount && tender.amount !== "Not specified") return tender.amount.replace("INR", "₹");
-  const value = Number(tender.amountValue || tender.value || 0);
-  if (!value) return "Not specified";
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
 
 function formatCrore(tender = {}) {
   const value = Number(tender.amountValue || tender.value || 0);
@@ -81,7 +22,7 @@ function formatCrore(tender = {}) {
 }
 
 function formatClosingDate(value) {
-  const date = parseDate(value);
+  const date = parseTenderDate(value);
   if (!date) return "Not specified";
   return date.toLocaleDateString("en-IN", {
     day: "2-digit",
@@ -98,14 +39,14 @@ function formatDaysLeft(tender) {
   return `${daysLeft} days left`;
 }
 
-function getIcon(tender) {
+function TenderCategoryIcon({ tender }) {
   const text = `${tender.category || ""} ${tender.title || ""}`.toLowerCase();
-  if (text.includes("cloud") || text.includes("it") || text.includes("software")) return Cloud;
-  if (text.includes("data")) return Database;
-  if (text.includes("security") || text.includes("cyber")) return Shield;
-  if (text.includes("construction") || text.includes("road")) return Landmark;
-  if (text.includes("manufacturing") || text.includes("equipment")) return Factory;
-  return Building2;
+  if (text.includes("cloud") || text.includes("it") || text.includes("software")) return <Cloud size={23} />;
+  if (text.includes("data")) return <Database size={23} />;
+  if (text.includes("security") || text.includes("cyber")) return <Shield size={23} />;
+  if (text.includes("construction") || text.includes("road")) return <Landmark size={23} />;
+  if (text.includes("manufacturing") || text.includes("equipment")) return <Factory size={23} />;
+  return <Building2 size={23} />;
 }
 
 function tenderType(tender) {
@@ -116,7 +57,6 @@ function tenderType(tender) {
 }
 
 export default function TenderCard({ tender, index = 0, isSaved = false, onView, onToggleSaved }) {
-  const Icon = getIcon(tender);
   const score = deriveAiScore(tender);
   const id = tender.id || tender.referenceNo;
 
@@ -132,7 +72,7 @@ export default function TenderCard({ tender, index = 0, isSaved = false, onView,
     >
       <div className="premium-tender-details">
         <span className="premium-category-icon">
-          <Icon size={23} />
+          <TenderCategoryIcon tender={tender} />
         </span>
         <div>
           <div className="premium-title-line">

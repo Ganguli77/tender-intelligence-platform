@@ -2,39 +2,29 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  BarChart3,
   Bell,
   Bookmark,
-  Bot,
-  CalendarDays,
-  Crown,
-  FileText,
   Grid2X2,
-  LayoutDashboard,
   List,
-  Menu,
-  Moon,
   RefreshCw,
   Search,
-  Settings,
   Sparkles,
-  User,
 } from "lucide-react";
 
 import { getTenderMarketplace, normalizeTenderForMarketplace } from "../api/tenderApi";
-import TenderCard, {
+import TenderCard from "../components/TenderCard";
+import {
   deriveAiScore,
   formatTenderValue,
   getMatchLabel,
   isClosingSoon,
   isExpiredTender,
-} from "../components/TenderCard";
+} from "../utils/tenderDisplay";
 import EmptyState from "../components/tenders/EmptyState";
 import TenderFilters from "../components/tenders/TenderFilters";
 import TenderPagination from "../components/tenders/TenderPagination";
 import TenderSkeleton from "../components/tenders/TenderSkeleton";
 import TenderTabs from "../components/tenders/TenderTabs";
-import { useAuth } from "../context/useAuth";
 import { tenders as fallbackTenders } from "../data/tenders";
 import "./TenderPages.css";
 
@@ -50,19 +40,6 @@ const initialFilters = {
   tenderType: "",
   sortBy: "closingDate",
 };
-
-const sidebarItems = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-  { label: "Tenders", icon: CalendarDays, path: "/tenders", active: true },
-  { label: "AI Opportunities", icon: Sparkles, path: "/insights" },
-  { label: "Saved Tenders", icon: Bookmark, path: "/saved-tenders" },
-  { label: "Alerts", icon: Bell, path: "/alerts" },
-  { label: "AI Chatbot", icon: Bot, path: "/insights" },
-  { label: "Analytics", icon: BarChart3, path: "/dashboard" },
-  { label: "Reports", icon: FileText, path: "/dashboard" },
-  { label: "Profile", icon: User, path: "/dashboard" },
-  { label: "Settings", icon: Settings, path: "/dashboard" },
-];
 
 function uniqueOptions(items, resolver) {
   return Array.from(new Set(items.map(resolver).filter(Boolean))).sort((a, b) => a.localeCompare(b));
@@ -174,7 +151,6 @@ function exportTenders(tenders) {
 
 export default function TenderList() {
   const navigate = useNavigate();
-  const { user, username } = useAuth();
   const [allTenders, setAllTenders] = useState([]);
   const [filters, setFilters] = useState(initialFilters);
   const [statusTab, setStatusTab] = useState("all");
@@ -272,17 +248,25 @@ export default function TenderList() {
   const activePage = Math.min(currentPage, totalPages);
   const paginatedTenders = filteredTenders.slice((activePage - 1) * pageSize, activePage * pageSize);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filters, statusTab, pageSize]);
-
   function updateFilter(key, value) {
+    setCurrentPage(1);
     setFilters((current) => ({ ...current, [key]: value }));
   }
 
   function resetFilters() {
+    setCurrentPage(1);
     setFilters(initialFilters);
     setStatusTab("all");
+  }
+
+  function updateStatusTab(tab) {
+    setCurrentPage(1);
+    setStatusTab(tab);
+  }
+
+  function updatePageSize(size) {
+    setCurrentPage(1);
+    setPageSize(size);
   }
 
   function toggleSaved(tenderId) {
@@ -298,90 +282,13 @@ export default function TenderList() {
     localStorage.setItem("nextenderSavedSearch", JSON.stringify({ filters, statusTab, savedAt: new Date().toISOString() }));
   }
 
-  const displayName = user?.name || username || "NexTender User";
-  const initials = displayName
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
   return (
-    <div className="premium-dashboard-shell">
-      <aside className="premium-sidebar">
-        <button className="premium-brand" type="button" onClick={() => navigate("/dashboard")}>
-          <span>N</span>
-          <strong>NexTender <b>AI</b></strong>
-        </button>
-
-        <nav aria-label="Dashboard navigation">
-          {sidebarItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.label}
-                type="button"
-                className={item.active ? "is-active" : ""}
-                onClick={() => navigate(item.path)}
-              >
-                <Icon size={19} />
-                {item.label}
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="premium-upgrade-card">
-          <Crown size={19} />
-          <strong>Upgrade to Pro</strong>
-          <p>Unlock advanced AI insight, unlimited search, and personalized alerts.</p>
-          <button type="button">Upgrade Now</button>
-        </div>
-
-        <button className="premium-support-card" type="button">
-          <span>Need Help?</span>
-          <strong>Contact Support</strong>
-        </button>
-      </aside>
-
-      <div className="premium-dashboard-main">
-        <header className="premium-topbar">
-          <button type="button" aria-label="Menu" className="premium-top-icon">
-            <Menu size={22} />
-          </button>
-          <label className="premium-command-search">
-            <Search size={19} />
-            <input
-              type="search"
-              placeholder="Search tenders, departments, keywords..."
-              value={filters.searchTerm}
-              onChange={(event) => updateFilter("searchTerm", event.target.value)}
-            />
-            <span>Ctrl + K</span>
-          </label>
-          <div className="premium-top-actions">
-            <button type="button" className="premium-top-icon notification-dot" aria-label="Notifications">
-              <Bell size={20} />
-            </button>
-            <button type="button" className="premium-top-icon" aria-label="Theme">
-              <Moon size={20} />
-            </button>
-            <button type="button" className="premium-profile-button">
-              <span>{user?.picture ? <img src={user.picture} alt="" /> : initials}</span>
-              <i>
-                <strong>{displayName}</strong>
-                <small>Premium Plan</small>
-              </i>
-            </button>
-          </div>
-        </header>
-
-        <motion.main
-          className="premium-tender-page"
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.45, ease: "easeOut" }}
-        >
+    <motion.main
+      className="premium-tender-page app-page"
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: "easeOut" }}
+    >
       <header className="premium-tender-header">
         <div>
           <span className="premium-kicker">
@@ -422,7 +329,7 @@ export default function TenderList() {
       ) : null}
 
       <section className="premium-results-panel">
-        <TenderTabs activeTab={statusTab} counts={tabCounts} onChange={setStatusTab} />
+        <TenderTabs activeTab={statusTab} counts={tabCounts} onChange={updateStatusTab} />
 
         <div className="premium-results-meta">
           <span>Total Results: {filteredTenders.length.toLocaleString("en-IN")}</span>
@@ -482,11 +389,9 @@ export default function TenderList() {
           totalItems={filteredTenders.length}
           totalPages={totalPages}
           onPageChange={setCurrentPage}
-          onPageSizeChange={setPageSize}
+          onPageSizeChange={updatePageSize}
         />
       </section>
-        </motion.main>
-      </div>
-    </div>
+    </motion.main>
   );
 }
