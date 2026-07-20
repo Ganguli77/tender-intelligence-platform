@@ -52,17 +52,26 @@ public class UserService {
         }
 
         User user = userOpt.get();
-        if (user.getPassword() != null && passwordEncoder.matches(password, user.getPassword())) {
+        String storedPassword = user.getPassword();
+        if (storedPassword == null) {
+            return Optional.empty();
+        }
+
+        if (isBcryptHash(storedPassword) && passwordEncoder.matches(password, storedPassword)) {
             return Optional.of(user);
         }
 
-        if (user.getPassword() != null && user.getPassword().equals(password)) {
+        if (storedPassword.equals(password)) {
             user.setPassword(passwordEncoder.encode(password));
             userRepository.save(user);
             return Optional.of(user);
         }
 
         return Optional.empty();
+    }
+
+    private boolean isBcryptHash(String password) {
+        return password.startsWith("$2a$") || password.startsWith("$2b$") || password.startsWith("$2y$");
     }
 
     public Optional<User> findByUsername(String username) {

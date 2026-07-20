@@ -129,7 +129,9 @@ public class TenderService {
             LocalDate closingFrom,
             LocalDate closingTo
     ) {
-        return Specification.where(matchesQuery(query))
+        Specification<Tender> specification = (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.conjunction();
+        return specification
+                .and(matchesQuery(query))
                 .and(matchesState(state))
                 .and(matchesContains("organization", organization))
                 .and(matchesContains("category", category))
