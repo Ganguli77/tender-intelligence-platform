@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">NexTender realistic globe hero reference</title>
+  <desc id="desc">A dark NexTender AI landing page with a shaded realistic blue planet, subtle continents, atmospheric cyan rim, and restrained tender network routes.</desc>
+  <defs>
+    <radialGradient id="space" cx="68%" cy="46%" r="80%"><stop offset="0" stop-color="#122d56"/><stop offset=".48" stop-color="#06152e"/><stop offset="1" stop-color="#020711"/></radialGradient>
+    <radialGradient id="planet" cx="30%" cy="25%" r="78%"><stop offset="0" stop-color="#4b9ec8"/><stop offset=".18" stop-color="#1c638f"/><stop offset=".48" stop-color="#0a315a"/><stop offset=".78" stop-color="#04162f"/><stop offset="1" stop-color="#010817"/></radialGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a2fbff"/><stop offset=".42" stop-color="#22c7ec"/><stop offset=".8" stop-color="#2563eb"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+    <linearGradient id="land" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3f9d99" stop-opacity=".84"/><stop offset=".5" stop-color="#17647a" stop-opacity=".72"/><stop offset="1" stop-color="#082b52" stop-opacity=".62"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="14" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="3"/></filter>
+    <pattern id="stars" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="15" cy="22" r="1.2" fill="#d5f8ff" opacity=".55"/><circle cx="74" cy="64" r=".8" fill="#8fddff" opacity=".5"/><circle cx="43" cy="88" r=".7" fill="#fff" opacity=".4"/></pattern>
+    <clipPath id="planetClip"><circle cx="1115" cy="452" r="276"/></clipPath>
+  </defs>
+  <rect width="1600" height="900" fill="url(#space)"/>
+  <rect width="1600" height="900" fill="url(#stars)" opacity=".65"/>
+  <g font-family="Arial, sans-serif">
+    <text x="84" y="80" fill="#8eefff" font-size="18" font-weight="700" letter-spacing="1">✦ NEXTENDER AI</text>
+    <g fill="#a9bdd8" font-size="14" letter-spacing="1"><text x="665" y="80">PLATFORM</text><text x="770" y="80">SOLUTIONS</text><text x="895" y="80">AI INSIGHTS</text><text x="1035" y="80">ABOUT</text></g>
+    <rect x="1322" y="52" width="102" height="42" rx="21" fill="none" stroke="#4edbf4"/><text x="1345" y="78" fill="#e8fdff" font-size="13">LOG IN</text>
+    <rect x="1440" y="52" width="118" height="42" rx="21" fill="#38bdf8"/><text x="1458" y="78" fill="#021224" font-size="12" font-weight="700">GET STARTED</text>
+    <text x="84" y="260" fill="#63eafb" font-size="14" font-weight="700" letter-spacing="2">AI-POWERED TENDER INTELLIGENCE</text>
+    <text x="84" y="330" fill="#f4fbff" font-size="57" font-weight="700">Find the tenders</text>
+    <text x="84" y="395" fill="#f4fbff" font-size="57" font-weight="700">your business can win.</text>
+    <text x="86" y="452" fill="#a8bdd8" font-size="19">Discover high-value opportunities with intelligent matching,</text>
+    <text x="86" y="482" fill="#a8bdd8" font-size="19">eligibility scoring, and deadline intelligence.</text>
+    <rect x="84" y="535" width="190" height="52" rx="26" fill="#38bdf8"/><text x="113" y="568" fill="#021224" font-size="14" font-weight="700">EXPLORE TENDERS  →</text>
+    <rect x="291" y="535" width="146" height="52" rx="26" fill="#0b2749" stroke="#315579"/><text x="323" y="568" fill="#dffaff" font-size="14">WATCH DEMO  ▶</text>
+    <g fill="#63eafb"><text x="84" y="695" font-size="26" font-weight="700">10,000+</text><text x="84" y="721" fill="#849cba" font-size="12">ACTIVE TENDERS</text><text x="262" y="695" font-size="26" font-weight="700">95%</text><text x="262" y="721" fill="#849cba" font-size="12">MATCH ACCURACY</text><text x="395" y="695" font-size="26" font-weight="700">INR 500Cr+</text><text x="395" y="721" fill="#849cba" font-size="12">OPPORTUNITY VALUE</text></g>
+  </g>
+  <g fill="none" stroke-linecap="round">
+    <ellipse cx="1115" cy="452" rx="362" ry="116" transform="rotate(-24 1115 452)" stroke="#42dff4" stroke-opacity=".5" stroke-width="2"/>
+    <ellipse cx="1115" cy="452" rx="420" ry="156" transform="rotate(31 1115 452)" stroke="#7c5cff" stroke-opacity=".42" stroke-width="2"/>
+    <ellipse cx="1115" cy="452" rx="490" ry="210" transform="rotate(-48 1115 452)" stroke="#38bdf8" stroke-opacity=".28" stroke-width="1.5"/>
+  </g>
+  <circle cx="1115" cy="452" r="303" fill="#35d7f5" opacity=".14" filter="url(#glow)"/>
+  <circle cx="1115" cy="452" r="276" fill="url(#planet)"/>
+  <g clip-path="url(#planetClip)">
+    <ellipse cx="1040" cy="320" rx="190" ry="110" fill="#b1f7ff" opacity=".08" filter="url(#soft)"/>
+    <path d="M865 310 C900 272 949 263 980 291 L1006 327 985 359 1001 391 975 432 954 478 916 466 899 425 870 397 846 353Z" fill="url(#land)"/>
+    <path d="M1080 236 C1125 211 1169 225 1192 257 L1179 294 1142 314 1128 355 1092 339 1078 299 1052 277Z" fill="url(#land)"/>
+    <path d="M1225 330 C1264 301 1323 315 1351 350 L1340 390 1302 405 1285 448 1250 440 1237 401 1209 378Z" fill="url(#land)"/>
+    <path d="M1104 477 C1141 461 1190 483 1209 522 L1190 562 1154 578 1125 552 1092 522Z" fill="url(#land)"/>
+    <path d="M1010 602 C1045 580 1076 589 1092 619 L1070 663 1036 676 1005 644Z" fill="url(#land)"/>
+    <g fill="none" stroke="#73e8ef" stroke-opacity=".16" stroke-width="1"><path d="M840 370 Q1040 300 1365 350"/><path d="M835 430 Q1050 380 1370 430"/><path d="M840 500 Q1050 470 1360 520"/><path d="M930 190 Q1000 420 950 720"/><path d="M1080 170 Q1130 420 1090 735"/><path d="M1230 190 Q1170 430 1250 690"/></g>
+    <g fill="#9afaff"><circle cx="1016" cy="332" r="4"/><circle cx="1125" cy="286" r="4"/><circle cx="1214" cy="360" r="5"/><circle cx="1282" cy="423" r="4"/><circle cx="1154" cy="505" r="5"/><circle cx="1048" cy="545" r="3"/></g>
+    <g fill="none" stroke="#61e9ff" stroke-opacity=".78" stroke-width="1.6"><path d="M1016 332 Q1080 270 1125 286"/><path d="M1125 286 Q1180 318 1214 360"/><path d="M1214 360 Q1252 398 1282 423"/><path d="M1214 360 Q1180 438 1154 505"/><path d="M1154 505 Q1090 535 1048 545"/></g>
+  </g>
+  <circle cx="1115" cy="452" r="276" fill="none" stroke="url(#rim)" stroke-width="5" filter="url(#glow)"/>
+  <circle cx="1115" cy="452" r="286" fill="none" stroke="#54eaff" stroke-opacity=".26" stroke-width="2"/>
+  <g fill="#a4fbff" filter="url(#soft)"><circle cx="1016" cy="332" r="8"/><circle cx="1214" cy="360" r="9"/><circle cx="1350" cy="272" r="4"/></g>
+  <g font-family="Arial, sans-serif" font-size="12"><rect x="1280" y="250" width="116" height="36" rx="18" fill="#071c38" stroke="#49e7f5"/><text x="1302" y="273" fill="#a5fbff">LIVE SIGNAL</text><rect x="792" y="620" width="130" height="36" rx="18" fill="#101d45" stroke="#8b73ff"/><text x="815" y="643" fill="#c7c1ff">AI MATCH 94%</text></g>
+</svg>

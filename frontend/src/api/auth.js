@@ -5,10 +5,18 @@ export { API_BASE_URL };
 
 async function parseResponse(response) {
   const text = await response.text();
-  const body = text ? JSON.parse(text) : {};
+  let body = {};
+
+  if (text) {
+    try {
+      body = JSON.parse(text);
+    } catch {
+      body = { message: text };
+    }
+  }
 
   if (!response.ok) {
-    const message = body.message || response.statusText || "Login failed";
+    const message = body.message || body.error || response.statusText || "Request failed";
     throw new Error(message);
   }
 

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">NexTender AI landing page visual reference</title>
+  <desc id="desc">Dark blue AI tender intelligence landing page with a glowing global network sphere.</desc>
+  <defs>
+    <radialGradient id="bg" cx="72%" cy="44%" r="78%"><stop offset="0" stop-color="#102c56"/><stop offset=".42" stop-color="#07162f"/><stop offset="1" stop-color="#020817"/></radialGradient>
+    <radialGradient id="globe" cx="36%" cy="27%" r="72%"><stop offset="0" stop-color="#66f7ff" stop-opacity=".94"/><stop offset=".22" stop-color="#1c7ee8" stop-opacity=".52"/><stop offset=".64" stop-color="#122864" stop-opacity=".88"/><stop offset="1" stop-color="#050b21"/></radialGradient>
+    <linearGradient id="cyan" x1="0" x2="1"><stop stop-color="#63f7ff"/><stop offset="1" stop-color="#4383ff"/></linearGradient>
+    <linearGradient id="pink" x1="0" x2="1"><stop stop-color="#ff56ca"/><stop offset="1" stop-color="#884dff"/></linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="10" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="smallGlow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M64 0H0V64" fill="none" stroke="#88a6cf" stroke-opacity=".1"/></pattern>
+    <clipPath id="sphere"><circle cx="1115" cy="445" r="285"/></clipPath>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#grid)" opacity=".44"/>
+  <g fill="#d9f6ff" opacity=".7">
+    <circle cx="780" cy="166" r="2"/><circle cx="945" cy="115" r="3"/><circle cx="1350" cy="178" r="2"/><circle cx="1490" cy="390" r="2"/><circle cx="870" cy="742" r="2"/><circle cx="1280" cy="770" r="3"/><circle cx="590" cy="642" r="2"/>
+  </g>
+  <g opacity=".38" fill="none" stroke="#4d9eff">
+    <ellipse cx="1115" cy="445" rx="370" ry="120" transform="rotate(-25 1115 445)"/>
+    <ellipse cx="1115" cy="445" rx="435" ry="165" transform="rotate(28 1115 445)"/>
+    <ellipse cx="1115" cy="445" rx="510" ry="225" transform="rotate(-48 1115 445)"/>
+  </g>
+  <g clip-path="url(#sphere)">
+    <circle cx="1115" cy="445" r="285" fill="url(#globe)"/>
+    <path d="M820 380 Q960 320 1110 370 T1410 350 M810 470 Q970 420 1130 465 T1420 450 M845 570 Q1000 520 1145 568 T1380 540 M950 170 Q1025 330 985 470 T1030 730 M1110 160 Q1160 310 1128 455 T1170 730 M1260 180 Q1190 330 1250 465 T1215 720" fill="none" stroke="#63e7ff" stroke-opacity=".34" stroke-width="2"/>
+    <path d="M875 555 Q1020 300 1240 220 M910 670 Q1100 490 1390 420 M890 310 Q1080 440 1350 600" fill="none" stroke="#f153d0" stroke-opacity=".42" stroke-width="2"/>
+    <g fill="#78f5ff" filter="url(#smallGlow)"><circle cx="1040" cy="375" r="6"/><circle cx="1166" cy="428" r="5"/><circle cx="1215" cy="512" r="7"/><circle cx="990" cy="530" r="4"/><circle cx="1288" cy="350" r="4"/></g>
+    <g fill="#ff75d7" filter="url(#smallGlow)"><circle cx="1100" cy="290" r="5"/><circle cx="1248" cy="595" r="5"/><circle cx="930" cy="440" r="4"/></g>
+  </g>
+  <circle cx="1115" cy="445" r="285" fill="none" stroke="url(#cyan)" stroke-width="5" filter="url(#glow)"/>
+  <circle cx="1115" cy="445" r="298" fill="none" stroke="#d65bff" stroke-opacity=".4" stroke-width="2"/>
+  <g fill="none" stroke="url(#pink)" stroke-width="2" opacity=".7"><path d="M1040 375 Q900 230 700 205"/><path d="M1166 428 Q1360 250 1480 270"/><path d="M990 530 Q845 680 680 685"/></g>
+  <g font-family="Arial, sans-serif" letter-spacing="1">
+    <text x="86" y="90" fill="#8ef9ff" font-size="18" font-weight="700">✦ NEXTENDER AI</text>
+    <text x="650" y="91" fill="#afc4e4" font-size="14">PLATFORM</text><text x="760" y="91" fill="#afc4e4" font-size="14">SOLUTIONS</text><text x="875" y="91" fill="#afc4e4" font-size="14">AI INSIGHTS</text><text x="1015" y="91" fill="#afc4e4" font-size="14">ABOUT</text>
+    <rect x="1328" y="59" width="105" height="42" rx="21" fill="none" stroke="#5bdff7"/><text x="1350" y="85" fill="#e5fbff" font-size="13">LOG IN</text>
+    <rect x="1448" y="59" width="112" height="42" rx="21" fill="url(#cyan)"/><text x="1464" y="85" fill="#021022" font-size="12" font-weight="700">GET STARTED</text>
+    <text x="86" y="270" fill="#66ecff" font-size="15" font-weight="700">AI-POWERED TENDER DISCOVERY</text>
+    <text x="86" y="340" fill="#f2f7ff" font-size="61" font-weight="700" letter-spacing="-2">Find the tenders</text><text x="86" y="408" fill="#f2f7ff" font-size="61" font-weight="700" letter-spacing="-2">your business can win.</text>
+    <text x="90" y="470" fill="#9bb1d0" font-size="20" letter-spacing="0">Discover high-value opportunities with AI matching,</text><text x="90" y="502" fill="#9bb1d0" font-size="20">eligibility scoring, and deadline intelligence.</text>
+    <rect x="86" y="552" width="190" height="54" rx="27" fill="url(#cyan)"/><text x="116" y="586" fill="#031329" font-size="15" font-weight="700">EXPLORE TENDERS  →</text>
+    <rect x="294" y="552" width="150" height="54" rx="27" fill="#122644" stroke="#355579"/><text x="326" y="586" fill="#e2efff" font-size="15">WATCH DEMO  ▶</text>
+    <text x="86" y="705" fill="#64eafa" font-size="28" font-weight="700">10,000+</text><text x="86" y="733" fill="#839abe" font-size="13">ACTIVE TENDERS</text>
+    <text x="270" y="705" fill="#64eafa" font-size="28" font-weight="700">95%</text><text x="270" y="733" fill="#839abe" font-size="13">MATCH ACCURACY</text>
+    <text x="410" y="705" fill="#64eafa" font-size="28" font-weight="700">INR 500Cr+</text><text x="410" y="733" fill="#839abe" font-size="13">OPPORTUNITY VALUE</text>
+    <g font-size="12"><rect x="1260" y="250" width="116" height="38" rx="19" fill="#071b36" stroke="#4fddf2"/><text x="1280" y="274" fill="#9df9ff">LIVE SIGNAL</text><rect x="790" y="605" width="140" height="38" rx="19" fill="#22193d" stroke="#d35ac9"/><text x="813" y="629" fill="#ffb0ed">AI MATCH 94%</text></g>
+  </g>
+</svg>

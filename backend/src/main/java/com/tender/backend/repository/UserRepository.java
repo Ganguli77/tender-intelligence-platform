@@ -2,6 +2,7 @@ package com.tender.backend.repository;
 
 import com.tender.backend.model.User;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,8 +19,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
             select u from User u
             where lower(u.email) = lower(:identifier)
                or lower(u.name) = lower(:identifier)
+            order by u.id asc
             """)
-    Optional<User> findByIdentifier(@Param("identifier") String identifier);
+    List<User> findAllByIdentifier(@Param("identifier") String identifier);
+
+    default Optional<User> findByIdentifier(String identifier) {
+        return findAllByIdentifier(identifier).stream().findFirst();
+    }
 
     default Optional<User> findByUsername(String username) {
         return findByIdentifier(username);

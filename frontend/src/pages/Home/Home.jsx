@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import * as THREE from "three";
+import { feature } from "topojson-client";
+import worldMapData from "world-atlas/countries-110m.json";
 import {
   Activity,
   ArrowRight,
@@ -355,7 +357,7 @@ function makeAIGlobeNetwork(count, radius) {
   nodes.forEach((node, index) => {
     for (let next = index + 1; next < nodes.length; next += 1) {
       const distance = node.distanceTo(nodes[next]);
-      if (distance < 0.72 && (index + next) % 4 === 0) {
+      if (distance < 0.82 && (index + next) % 6 === 0) {
         linePositions.push(node.x, node.y, node.z, nodes[next].x, nodes[next].y, nodes[next].z);
       }
     }
@@ -377,91 +379,39 @@ function makeGlobeMapTexture() {
     ((90 - lat) / 180) * height,
   ];
 
-  const drawProjectedLine = (coordinates, opacity = 0.24, lineWidth = 1.5) => {
-    context.beginPath();
-    coordinates.map(toPoint).forEach(([x, y], index) => {
-      if (index === 0) context.moveTo(x, y);
-      else context.lineTo(x, y);
-    });
-    context.lineWidth = lineWidth;
-    context.strokeStyle = `rgba(255,255,255,${opacity})`;
-    context.stroke();
-  };
-
   context.clearRect(0, 0, width, height);
 
-  globeMapOutlines.forEach((outline, index) => {
-    const points = outline.map(toPoint);
+  const countries = feature(worldMapData, worldMapData.objects.countries).features;
+  const drawRing = (ring) => {
     context.beginPath();
-    points.forEach(([x, y], pointIndex) => {
+    ring.map(toPoint).forEach(([x, y], pointIndex) => {
       if (pointIndex === 0) context.moveTo(x, y);
       else context.lineTo(x, y);
     });
     context.closePath();
+  };
 
-    const gradient = context.createRadialGradient(width * 0.58, height * 0.42, 20, width * 0.58, height * 0.42, width * 0.46);
-    gradient.addColorStop(0, "rgba(192, 132, 252, 0.58)");
-    gradient.addColorStop(0.45, "rgba(168, 85, 247, 0.46)");
-    gradient.addColorStop(1, "rgba(76, 29, 149, 0.24)");
-    context.fillStyle = gradient;
-    context.fill();
+  countries.forEach((country) => {
+    const polygons = country.geometry.type === "Polygon"
+      ? [country.geometry.coordinates]
+      : country.geometry.coordinates;
 
-    context.lineWidth = index === 0 ? 4 : 3;
-    context.strokeStyle = index === 0 ? "rgba(216,180,254,0.62)" : "rgba(168,85,247,0.5)";
-    context.shadowColor = "rgba(168,85,247,0.86)";
-    context.shadowBlur = 22;
-    context.stroke();
-    context.shadowBlur = 0;
-
-    context.save();
-    context.clip();
-    context.globalCompositeOperation = "screen";
-
-    const latitudes = [-55, -40, -25, -10, 5, 20, 35, 50, 65];
-    const longitudes = [-160, -135, -110, -85, -60, -35, -10, 15, 40, 65, 90, 115, 140, 165];
-
-    latitudes.forEach((lat, lineIndex) => {
-      drawProjectedLine(
-        Array.from({ length: 18 }, (_, pointIndex) => [
-          lat + Math.sin(pointIndex * 0.72 + lineIndex) * 2.2,
-          -180 + pointIndex * 21.2,
-        ]),
-        0.08,
-        1,
-      );
+    polygons.forEach((polygon) => {
+      polygon.forEach(drawRing);
+      const gradient = context.createRadialGradient(width * 0.58, height * 0.42, 20, width * 0.58, height * 0.42, width * 0.46);
+      gradient.addColorStop(0, "rgba(84, 234, 255, 0.74)");
+      gradient.addColorStop(0.48, "rgba(56, 189, 248, 0.46)");
+      gradient.addColorStop(1, "rgba(37, 99, 235, 0.18)");
+      context.fillStyle = gradient;
+      context.fill("evenodd");
+      context.lineWidth = 2.2;
+      context.strokeStyle = "rgba(154, 250, 255, 0.58)";
+      context.shadowColor = "rgba(56, 189, 248, 0.68)";
+      context.shadowBlur = 12;
+      context.stroke();
+      context.shadowBlur = 0;
     });
 
-    longitudes.forEach((lon, lineIndex) => {
-      drawProjectedLine(
-        Array.from({ length: 13 }, (_, pointIndex) => [
-          72 - pointIndex * 11.4,
-          lon + Math.sin(pointIndex * 0.8 + lineIndex) * 2.4,
-        ]),
-        0.08,
-        1,
-      );
-    });
-
-    const regionalLines = [
-      [[49, -125], [43, -104], [38, -84], [31, -78]],
-      [[58, -112], [51, -95], [46, -75]],
-      [[21, -101], [17, -92], [13, -84]],
-      [[5, -75], [-8, -66], [-20, -58], [-36, -58]],
-      [[-8, -78], [-16, -70], [-28, -67], [-42, -71]],
-      [[55, 6], [48, 17], [44, 29], [39, 43]],
-      [[50, 45], [43, 68], [39, 90], [44, 118]],
-      [[31, 69], [27, 79], [23, 88]],
-      [[28, 100], [19, 106], [12, 104]],
-      [[29, 32], [17, 30], [5, 29], [-11, 30]],
-      [[7, 12], [-6, 21], [-21, 24], [-31, 18]],
-      [[-14, 122], [-23, 132], [-32, 143]],
-    ];
-
-    regionalLines.forEach((line) => drawProjectedLine(line, 0.18, 1.35));
-
-    context.fillStyle = "rgba(124,58,237,0.16)";
-    context.fillRect(0, 0, width, height);
-    context.restore();
   });
 
   const texture = new THREE.CanvasTexture(canvas);
@@ -560,27 +510,27 @@ function LightAIGlobe3D() {
     globeGroup.rotation.set(-0.12, -2.75, 0.04);
     scene.add(globeGroup);
 
-    scene.add(new THREE.AmbientLight(0x6d28d9, 1.05));
-    const keyLight = new THREE.DirectionalLight(0xd8b4fe, 1.15);
+    scene.add(new THREE.AmbientLight(0x123d78, 1.1));
+    const keyLight = new THREE.DirectionalLight(0x9defff, 1.25);
     keyLight.position.set(-3, 4, 5);
-    const purpleRim = new THREE.DirectionalLight(0xa855f7, 3.75);
-    purpleRim.position.set(4.5, 1.4, -3);
-    const violetFill = new THREE.PointLight(0x7c3aed, 4.3, 9);
-    violetFill.position.set(0.4, -0.3, 2.8);
-    scene.add(keyLight, purpleRim, violetFill);
+    const violetRim = new THREE.DirectionalLight(0x8b5cf6, 3.45);
+    violetRim.position.set(4.5, 1.4, -3);
+    const cyanFill = new THREE.PointLight(0x28b9ff, 4.8, 9);
+    cyanFill.position.set(0.4, -0.3, 2.8);
+    scene.add(keyLight, violetRim, cyanFill);
 
     const radius = 1.72;
     const shell = new THREE.Mesh(
       new THREE.SphereGeometry(radius, 96, 48),
       new THREE.MeshPhysicalMaterial({
-        color: 0x07030f,
-        emissive: 0x1d0738,
-        emissiveIntensity: 0.28,
-        roughness: 0.46,
-        metalness: 0.46,
-        transmission: 0.03,
+        color: 0x061d3b,
+        emissive: 0x073567,
+        emissiveIntensity: 0.3,
+        roughness: 0.74,
+        metalness: 0.12,
+        transmission: 0,
         transparent: true,
-        opacity: 0.48,
+        opacity: 0.9,
         depthWrite: false,
         clearcoat: 0.55,
         clearcoatRoughness: 0.28,
@@ -591,9 +541,9 @@ function LightAIGlobe3D() {
     const halo = new THREE.Mesh(
       new THREE.SphereGeometry(radius * 1.12, 96, 48),
       new THREE.MeshBasicMaterial({
-        color: 0x7c3aed,
+        color: 0x38bdf8,
         transparent: true,
-        opacity: 0.08,
+        opacity: 0.12,
         side: THREE.BackSide,
         depthWrite: false,
       }),
@@ -601,12 +551,13 @@ function LightAIGlobe3D() {
     globeGroup.add(halo);
 
     const rim = new THREE.Mesh(
-      new THREE.SphereGeometry(radius * 1.012, 96, 48),
+      new THREE.SphereGeometry(radius * 1.018, 96, 48),
       new THREE.MeshBasicMaterial({
-        color: 0xc084fc,
-        wireframe: true,
+        color: 0x63f4ff,
         transparent: true,
-        opacity: 0.14,
+        opacity: 0.065,
+        side: THREE.BackSide,
+        blending: THREE.AdditiveBlending,
         depthWrite: false,
       }),
     );
@@ -617,7 +568,7 @@ function LightAIGlobe3D() {
       map: mapTexture,
       color: 0xffffff,
       transparent: true,
-      opacity: 0.78,
+      opacity: 0.56,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
@@ -627,45 +578,17 @@ function LightAIGlobe3D() {
     );
     globeGroup.add(mapSurface);
 
-    const ringMaterial = new THREE.LineBasicMaterial({
-      color: 0xa855f7,
-      transparent: true,
-      opacity: 0.18,
-      depthWrite: false,
-    });
-    const makeCircleLine = (points) => new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(points), ringMaterial);
-
-    [-0.78, -0.48, -0.22, 0.08, 0.34, 0.62, 0.86].forEach((yScale) => {
-      const y = radius * yScale;
-      const ringRadius = Math.sqrt(radius * radius - y * y);
-      const points = Array.from({ length: 120 }, (_, index) => {
-        const angle = (index / 120) * Math.PI * 2;
-        return new THREE.Vector3(Math.cos(angle) * ringRadius, y, Math.sin(angle) * ringRadius);
-      });
-      globeGroup.add(makeCircleLine(points));
-    });
-
-    Array.from({ length: 10 }, (_, index) => index * (Math.PI / 10)).forEach((angle) => {
-      const points = Array.from({ length: 140 }, (_, pointIndex) => {
-        const theta = (pointIndex / 140) * Math.PI * 2;
-        return new THREE.Vector3(Math.cos(theta) * radius, Math.sin(theta) * radius, 0);
-      });
-      const longitude = makeCircleLine(points);
-      longitude.rotation.y = angle;
-      globeGroup.add(longitude);
-    });
-
-    const { land, ocean } = makeGlobePointCloud(14000, radius * 1.028);
+    const { land, ocean } = makeGlobePointCloud(6200, radius * 1.028);
     const landGeometry = new THREE.BufferGeometry();
     landGeometry.setAttribute("position", new THREE.BufferAttribute(land, 3));
     const landPoints = new THREE.Points(
       landGeometry,
       new THREE.PointsMaterial({
-        color: 0xc084fc,
-        size: 0.029,
+        color: 0x54eaff,
+        size: 0.024,
         sizeAttenuation: true,
         transparent: true,
-        opacity: 0.24,
+        opacity: 0.78,
         depthWrite: false,
       }),
     );
@@ -675,23 +598,23 @@ function LightAIGlobe3D() {
     const oceanPoints = new THREE.Points(
       oceanGeometry,
       new THREE.PointsMaterial({
-        color: 0x7c3aed,
-        size: 0.011,
+        color: 0x0b2f66,
+        size: 0.008,
         sizeAttenuation: true,
         transparent: true,
-        opacity: 0.2,
+        opacity: 0.045,
         depthWrite: false,
       }),
     );
     globeGroup.add(oceanPoints, landPoints);
 
-    const { nodes: aiNodes, linePositions: aiLinePositions } = makeAIGlobeNetwork(145, radius * 1.075);
+    const { nodes: aiNodes, linePositions: aiLinePositions } = makeAIGlobeNetwork(132, radius * 1.075);
     const aiNetworkGeometry = new THREE.BufferGeometry();
     aiNetworkGeometry.setAttribute("position", new THREE.BufferAttribute(aiLinePositions, 3));
     const aiNetworkMaterial = new THREE.LineBasicMaterial({
-      color: 0xc084fc,
+      color: 0x70eaff,
       transparent: true,
-      opacity: 0.38,
+      opacity: 0.44,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
@@ -700,8 +623,8 @@ function LightAIGlobe3D() {
 
     const aiNodeGeometry = new THREE.BufferGeometry().setFromPoints(aiNodes);
     const aiNodeMaterial = new THREE.PointsMaterial({
-      color: 0xf3e8ff,
-      size: 0.034,
+      color: 0xf5fdff,
+      size: 0.052,
       sizeAttenuation: true,
       transparent: true,
       opacity: 0.88,
@@ -714,7 +637,7 @@ function LightAIGlobe3D() {
     const mapLineMaterials = [];
     globeMapOutlines.forEach((outline, index) => {
       const material = new THREE.LineBasicMaterial({
-        color: index === 0 ? 0xc084fc : 0xa855f7,
+        color: index === 0 ? 0x64f5ff : 0x8b5cf6,
         transparent: true,
         opacity: index === 0 ? 0.42 : 0.32,
         depthWrite: false,
@@ -773,6 +696,33 @@ function LightAIGlobe3D() {
       globeGroup.add(line);
     });
 
+    const signalStart = pinVectors[0].clone().multiplyScalar(1.02);
+    const signalEnd = signalStart.clone().normalize().multiplyScalar(radius * 1.82).add(new THREE.Vector3(0.32, 0.22, 0.18));
+    const signalControl = signalStart.clone().lerp(signalEnd, 0.52).add(new THREE.Vector3(0, 0.18, 0));
+    const signalCurve = new THREE.QuadraticBezierCurve3(signalStart, signalControl, signalEnd);
+    const signalLineMaterial = new THREE.LineBasicMaterial({
+      color: 0xfbbf24,
+      transparent: true,
+      opacity: 0.9,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const signalLine = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(signalCurve.getPoints(48)),
+      signalLineMaterial,
+    );
+    globeGroup.add(signalLine);
+
+    const signalPulseMaterial = new THREE.MeshBasicMaterial({
+      color: 0xfff1a8,
+      transparent: true,
+      opacity: 1,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const signalPulse = new THREE.Mesh(new THREE.SphereGeometry(0.075, 18, 18), signalPulseMaterial);
+    globeGroup.add(signalPulse);
+
     pinVectors.forEach((position, index) => {
       const markerMaterial = new THREE.MeshBasicMaterial({
         color: index === 0 ? 0xffffff : 0xc084fc,
@@ -813,79 +763,77 @@ function LightAIGlobe3D() {
       const isDark = document.documentElement.getAttribute("data-theme") === "dark";
 
       if (isDark) {
-        shell.material.color.setHex(0x07030f);
-        shell.material.emissive.setHex(0x1d0738);
+        shell.material.color.setHex(0x061d3b);
+        shell.material.emissive.setHex(0x073567);
         shell.material.emissiveIntensity = 0.3;
-        shell.material.opacity = 0.5;
-        shell.material.metalness = 0.48;
-        shell.material.transmission = 0.02;
-        shell.material.clearcoat = 0.5;
-        halo.material.opacity = 0.1;
-        rim.material.color.setHex(0xc084fc);
-        rim.material.opacity = 0.18;
-        mapMaterial.opacity = 0.78;
-        aiNetworkMaterial.opacity = 0.48;
+        shell.material.opacity = 0.9;
+        shell.material.metalness = 0.12;
+        shell.material.transmission = 0;
+        shell.material.clearcoat = 0.55;
+        halo.material.opacity = 0.12;
+        rim.material.color.setHex(0x63f4ff);
+        rim.material.opacity = 0.065;
+        mapMaterial.opacity = 0.56;
+        aiNetworkMaterial.opacity = 0.44;
         aiNodeMaterial.opacity = 0.94;
-        landPoints.material.color.setHex(0xa855f7);
-        landPoints.material.size = 0.018;
-        landPoints.material.opacity = 0.24;
-        oceanPoints.material.color.setHex(0x7c3aed);
-        oceanPoints.material.opacity = 0.18;
+        landPoints.material.color.setHex(0x54eaff);
+        landPoints.material.size = 0.026;
+        landPoints.material.opacity = 0.78;
+        oceanPoints.material.color.setHex(0x0b2f66);
+        oceanPoints.material.opacity = 0.045;
         particles.material.opacity = 0.52;
-        ringMaterial.opacity = 0.2;
         mapLineMaterials.forEach((material, index) => {
-          material.color.setHex(index === 0 ? 0xc084fc : 0xa855f7);
-          material.opacity = index === 0 ? 0.36 : 0.28;
+          material.color.setHex(index === 0 ? 0x64f5ff : 0x8b5cf6);
+          material.opacity = index === 0 ? 0.42 : 0.32;
         });
         routeMaterials.forEach((material, index) => {
-          material.color.setHex(index % 2 ? 0xc084fc : 0xa855f7);
+          material.color.setHex(index % 2 ? 0x8b5cf6 : 0x38bdf8);
           material.opacity = 0.58;
         });
         markerMaterials.forEach((material, index) => {
-          material.color.setHex(index === 0 ? 0xf3e8ff : 0xc084fc);
+          material.color.setHex(index === 0 ? 0xf5fdff : 0x63f4ff);
           material.opacity = 0.96;
         });
         pulseMaterials.forEach((material) => {
-          material.color.setHex(0xa855f7);
+          material.color.setHex(0x8b5cf6);
           material.opacity = 0.24;
         });
-        themeState.landBaseOpacity = 0.2;
-        themeState.landPulse = 0.04;
+        themeState.landBaseOpacity = 0.72;
+        themeState.landPulse = 0.06;
       } else {
-        shell.material.color.setHex(0x090414);
-        shell.material.emissive.setHex(0x25084a);
-        shell.material.emissiveIntensity = 0.34;
-        shell.material.opacity = 0.48;
-        shell.material.metalness = 0.42;
-        shell.material.transmission = 0.03;
-        shell.material.clearcoat = 0.6;
-        halo.material.opacity = 0.1;
-        rim.material.color.setHex(0xa855f7);
-        rim.material.opacity = 0.14;
-        mapMaterial.opacity = 0.76;
-        aiNetworkMaterial.opacity = 0.44;
+        shell.material.color.setHex(0x06142f);
+        shell.material.emissive.setHex(0x0b3d78);
+        shell.material.emissiveIntensity = 0.32;
+        shell.material.opacity = 0.72;
+        shell.material.metalness = 0.24;
+        shell.material.transmission = 0;
+        shell.material.clearcoat = 0.55;
+        halo.material.opacity = 0.07;
+        rim.material.color.setHex(0x38bdf8);
+        rim.material.opacity = 0.035;
+        mapMaterial.opacity = 0.42;
+        aiNetworkMaterial.opacity = 0.28;
         aiNodeMaterial.opacity = 0.9;
-        landPoints.material.color.setHex(0xa855f7);
-        landPoints.material.size = 0.018;
-        landPoints.material.opacity = 0.22;
-        oceanPoints.material.color.setHex(0x7c3aed);
-        oceanPoints.material.opacity = 0.2;
+        landPoints.material.color.setHex(0x38bdf8);
+        landPoints.material.size = 0.02;
+        landPoints.material.opacity = 0.3;
+        oceanPoints.material.color.setHex(0x2563eb);
+        oceanPoints.material.opacity = 0.08;
         particles.material.opacity = 0.44;
-        ringMaterial.opacity = 0.18;
         mapLineMaterials.forEach((material, index) => {
-          material.color.setHex(index === 0 ? 0xc084fc : 0x9333ea);
-          material.opacity = index === 0 ? 0.34 : 0.26;
+          material.color.setHex(index === 0 ? 0x38bdf8 : 0x8b5cf6);
+          material.opacity = index === 0 ? 0.38 : 0.28;
         });
         routeMaterials.forEach((material, index) => {
-          material.color.setHex(index % 2 ? 0xc084fc : 0x7c3aed);
+          material.color.setHex(index % 2 ? 0x8b5cf6 : 0x2563eb);
           material.opacity = 0.5;
         });
         markerMaterials.forEach((material, index) => {
-          material.color.setHex(index === 0 ? 0xf3e8ff : 0xa855f7);
+          material.color.setHex(index === 0 ? 0xffffff : 0x38bdf8);
           material.opacity = 0.98;
         });
         pulseMaterials.forEach((material) => {
-          material.color.setHex(0x7c3aed);
+          material.color.setHex(0x2563eb);
           material.opacity = 0.22;
         });
         themeState.landBaseOpacity = 0.18;
@@ -933,6 +881,9 @@ function LightAIGlobe3D() {
     const animate = (timestamp) => {
       timer.update(timestamp);
       const elapsed = timer.getElapsed();
+      const signalProgress = (elapsed * 0.2) % 1;
+      signalPulse.position.copy(signalCurve.getPointAt(signalProgress));
+      signalPulseMaterial.opacity = 0.62 + Math.abs(Math.sin(elapsed * 3.2)) * 0.38;
       globeGroup.rotation.y = -2.75 + elapsed * 0.075;
       globeGroup.rotation.x = -0.12 + Math.sin(elapsed * 0.4) * 0.025;
       globeGroup.rotation.z = 0.04 + Math.sin(elapsed * 0.22) * 0.018;
@@ -983,7 +934,6 @@ function AIGlobeIllustration() {
   return (
     <div className="home-globe-shell" aria-label="AI tender intelligence globe illustration">
       <div className="home-globe-orbit home-globe-orbit--outer" />
-      <div className="home-globe-orbit home-globe-orbit--inner" />
 
       <LightAIGlobe3D />
 
@@ -1319,58 +1269,25 @@ function InsightsPreview() {
         </div>
 
         <div className="home-insight-metrics">
-          <article>
-            <span>Risk Level</span>
-            <strong>Low</strong>
-            <small>Safe</small>
-          </article>
-          <article>
-            <span>Competition</span>
-            <strong>Medium</strong>
-            <small>Balanced</small>
-          </article>
-          <article>
-            <span>Deadline</span>
-            <strong>12d</strong>
-            <small>Urgent</small>
-          </article>
+          <article><span>Risk Level</span><strong>Low</strong><small>Safe</small></article>
+          <article><span>Competition</span><strong>Medium</strong><small>Balanced</small></article>
+          <article><span>Deadline</span><strong>12d</strong><small>Urgent</small></article>
         </div>
 
         <div className="home-signal-summary">
-          <div>
-            <span>AI Signal Summary</span>
-            <strong>Strong Opportunity</strong>
-          </div>
+          <div><span>AI Signal Summary</span><strong>Strong Opportunity</strong></div>
           <div className="home-signal-grid">
-            <article>
-              <span>Category Fit</span>
-              <strong>Strong</strong>
-            </article>
-            <article>
-              <span>Budget Alignment</span>
-              <strong>Good</strong>
-            </article>
-            <article>
-              <span>Missing Documents</span>
-              <strong>1 item</strong>
-            </article>
+            <article><span>Category Fit</span><strong>Strong</strong></article>
+            <article><span>Budget Alignment</span><strong>Good</strong></article>
+            <article><span>Missing Documents</span><strong>1 item</strong></article>
           </div>
         </div>
 
         <div className="home-ai-summary">
           <span>AI Summary</span>
-          <p>
-            This tender shows a high probability of eligibility based on category alignment, budget range, and recent
-            application patterns. Recommended for immediate review.
-          </p>
-          <div className="home-probability">
-            <span>Winning Probability</span>
-            <strong>78%</strong>
-          </div>
-          <Link className="home-button home-button--primary" to="/insights">
-            View AI Insights
-            <ArrowRight size={18} />
-          </Link>
+          <p>This tender shows a high probability of eligibility based on category alignment, budget range, and recent application patterns. Recommended for immediate review.</p>
+          <div className="home-probability"><span>Winning Probability</span><strong>78%</strong></div>
+          <Link className="home-button home-button--primary" to="/insights">View AI Insights<ArrowRight size={18} /></Link>
         </div>
       </div>
     </section>
@@ -1391,7 +1308,7 @@ export default function Home() {
             </span>
             <span className="home-kicker home-kicker--secondary">
               <Sparkles size={15} />
-              AI <b>•</b> Smart Matching <b>•</b> Predictive Analytics
+              AI <b>|</b> Smart Matching <b>|</b> Predictive Analytics
             </span>
           </div>
           <h1>

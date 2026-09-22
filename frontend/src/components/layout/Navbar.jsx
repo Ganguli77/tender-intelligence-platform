@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, Moon, Search, Sun } from "lucide-react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { ArrowRight, Menu, Moon, Search, Sun, X } from "lucide-react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import ProfileDropdown from "../ProfileDropdown";
 import { useAuth } from "../../context/useAuth";
 import { useTheme } from "../../context/ThemeContext";
@@ -17,6 +17,7 @@ const publicLinks = [
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -31,6 +32,40 @@ export default function Navbar() {
   }, []);
 
   const closeMenu = () => setMenuOpen(false);
+
+  useEffect(() => {
+    if (!location.hash) return;
+
+    const target = document.querySelector(location.hash);
+    if (target) {
+      window.requestAnimationFrame(() => target.scrollIntoView({ behavior: "smooth", block: "start" }));
+    }
+  }, [location]);
+
+  const getLinkClass = (link, isActive) => {
+    const [pathname, hash] = link.path.split("#");
+    const isHashActive = hash ? location.pathname === pathname && location.hash === `#${hash}` : false;
+    const isPlainActive = !hash && isActive && !location.hash;
+
+    return isHashActive || isPlainActive ? "site-nav__link is-active" : "site-nav__link";
+  };
+
+  const handleLinkClick = (event, link) => {
+    closeMenu();
+
+    if (!link.path.includes("#")) return;
+
+    const [, hash] = link.path.split("#");
+    const targetId = hash ? `#${hash}` : "";
+
+    if (location.pathname === "/" && targetId) {
+      event.preventDefault();
+      navigate(link.path);
+      window.requestAnimationFrame(() => {
+        document.querySelector(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  };
 
   const handleLogin = () => {
     closeMenu();
@@ -54,9 +89,7 @@ export default function Navbar() {
           aria-label="Toggle navigation menu"
           onClick={() => setMenuOpen((current) => !current)}
         >
-          <span />
-          <span />
-          <span />
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
 
         <nav className={`site-nav ${menuOpen ? "is-open" : ""}`}>
@@ -65,8 +98,8 @@ export default function Navbar() {
               <NavLink
                 key={link.path}
                 to={link.path}
-                onClick={closeMenu}
-                className={({ isActive }) => (isActive ? "site-nav__link is-active" : "site-nav__link")}
+                onClick={(event) => handleLinkClick(event, link)}
+                className={({ isActive }) => getLinkClass(link, isActive)}
               >
                 {link.label}
               </NavLink>
@@ -90,7 +123,10 @@ export default function Navbar() {
               className="icon-button"
               type="button"
               aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
-              onClick={toggleTheme}
+              onClick={() => {
+                closeMenu();
+                toggleTheme();
+              }}
             >
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
             </button>
@@ -102,7 +138,14 @@ export default function Navbar() {
                 <button className="button button--ghost" type="button" onClick={handleLogin}>
                   Login
                 </button>
-                <button className="button button--primary" type="button" onClick={() => navigate("/register")}>
+                <button
+                  className="button button--primary"
+                  type="button"
+                  onClick={() => {
+                    closeMenu();
+                    navigate("/register");
+                  }}
+                >
                   Get Started <ArrowRight size={16} />
                 </button>
               </>
