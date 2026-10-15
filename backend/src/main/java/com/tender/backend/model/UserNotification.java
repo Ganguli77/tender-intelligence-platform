@@ -1,6 +1,7 @@
 package com.tender.backend.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,6 +22,7 @@ public class UserNotification {
     private String message;
     private Long tenderId;
     private Long submissionId;
+    @Column(name = "is_read", nullable = false)
     private boolean read;
     private LocalDateTime createdAt;
 
