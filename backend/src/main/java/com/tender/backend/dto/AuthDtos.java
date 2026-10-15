@@ -16,6 +16,8 @@ public final class AuthDtos {
             @NotBlank(message = "Email is required")
             String email,
 
+            String username,
+
             @Size(min = 6, message = "Password must be at least 6 characters")
             String password,
 

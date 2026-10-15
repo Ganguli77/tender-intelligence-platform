@@ -28,6 +28,7 @@ api.interceptors.request.use((config) => {
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    config._authTokenAttached = true;
   }
 
   return config;
@@ -36,7 +37,14 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error?.response?.status === 401 && typeof window !== "undefined") {
+    // Public auth endpoints also return 401 (for example, a wrong password).
+    // Only treat it as an expired session when this request actually carried
+    // a saved bearer token.
+    if (
+      error?.response?.status === 401 &&
+      error.config?._authTokenAttached &&
+      typeof window !== "undefined"
+    ) {
       window.localStorage.removeItem(AUTH_STORAGE_KEY);
       window.dispatchEvent(new Event("nextender:unauthorized"));
     }

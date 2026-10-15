@@ -28,6 +28,9 @@ public class User {
     private String name;
 
     @Column(unique = true)
+    private String username;
+
+    @Column(unique = true)
     private String email;
 
     private String picture;
@@ -121,6 +124,9 @@ public class User {
     }
 
     public String getUsername() {
+        if (username != null && !username.isBlank()) {
+            return username;
+        }
         if (email != null && !email.isBlank()) {
             return email;
         }
@@ -128,9 +134,6 @@ public class User {
     }
 
     public void setUsername(String username) {
-        this.name = username;
-        if (username != null && username.contains("@")) {
-            this.email = username;
-        }
+        this.username = username == null || username.isBlank() ? null : username.trim();
     }
 }

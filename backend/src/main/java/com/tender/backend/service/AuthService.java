@@ -40,6 +40,7 @@ public class AuthService {
     public AuthResponse register(User input) {
         String email = normalizeEmail(firstNonBlank(input.getEmail(), input.getUsername()));
         String name = firstNonBlank(input.getName(), input.getUsername(), email);
+        String username = firstNonBlank(input.getUsername(), email);
 
         if (email.isBlank()) {
             throw new IllegalArgumentException("Email is required");
@@ -50,10 +51,14 @@ public class AuthService {
         if (userRepository.findByEmailIgnoreCase(email).isPresent()) {
             throw new IllegalArgumentException("Email already exists");
         }
+        if (userRepository.findByUsernameIgnoreCase(username).isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
 
         User user = new User();
         user.setEmail(email);
         user.setName(name);
+        user.setUsername(username);
         user.setPicture(input.getPicture());
         user.setPassword(passwordEncoder.encode(input.getPassword()));
         user.setRole("USER");

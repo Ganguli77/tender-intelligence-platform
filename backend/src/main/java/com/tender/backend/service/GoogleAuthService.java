@@ -66,6 +66,8 @@ public class GoogleAuthService {
 
     private User createGoogleUser(String email) {
         User user = new User();
+        user.setEmail(email);
+        user.setName(email);
         user.setUsername(email);
         user.setPassword(passwordEncoder.encode("GOOGLE:" + UUID.randomUUID()));
         user.setRole("USER");

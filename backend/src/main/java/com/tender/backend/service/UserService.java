@@ -31,9 +31,14 @@ public class UserService {
         if (userRepository.findByEmailIgnoreCase(email).isPresent()) {
             throw new IllegalArgumentException("Email already exists");
         }
+        String username = firstNonBlank(input.getUsername(), email);
+        if (userRepository.findByUsernameIgnoreCase(username).isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
 
         User user = new User();
         user.setName(firstNonBlank(input.getName(), input.getUsername(), email));
+        user.setUsername(username);
         user.setEmail(email.trim().toLowerCase());
         user.setPicture(input.getPicture());
         user.setPassword(passwordEncoder.encode(input.getPassword()));

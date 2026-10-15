@@ -13,11 +13,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByNameIgnoreCase(String name);
 
+    Optional<User> findByUsernameIgnoreCase(String username);
+
     long countByCreatedAtAfter(LocalDateTime createdAt);
 
     @Query("""
             select u from User u
             where lower(u.email) = lower(:identifier)
+               or lower(u.username) = lower(:identifier)
                or lower(u.name) = lower(:identifier)
             order by u.id asc
             """)

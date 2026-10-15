@@ -47,14 +47,17 @@ class UserServiceTest {
     void registerShouldIgnoreRequestedAdminRole() {
         User request = new User();
         request.setEmail("new-user@example.com");
+        request.setUsername("newuser");
         request.setPassword("password123");
         request.setRole("ADMIN");
 
+        when(userRepository.findByUsernameIgnoreCase("newuser")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         User registered = userService.register(request);
 
         assertEquals("USER", registered.getRole());
+        assertEquals("newuser", registered.getUsername());
         verify(userRepository).save(any(User.class));
     }
 }
