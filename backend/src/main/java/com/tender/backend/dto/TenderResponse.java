@@ -28,7 +28,9 @@ public record TenderResponse(
         String website,
         List<String> eligibility,
         List<String> documents,
-        String description
+        String description,
+        String submissionMode,
+        String officialUrl
 ) {
     public static TenderResponse from(Tender tender) {
         return new TenderResponse(
@@ -55,7 +57,9 @@ public record TenderResponse(
                 null,
                 tender.getEligibility() == null ? List.of() : tender.getEligibility(),
                 tender.getDocuments() == null ? List.of() : tender.getDocuments(),
-                tender.getDescription()
+                tender.getDescription(),
+                tender.getSubmissionMode(),
+                tender.getOfficialUrl()
         );
     }
 }

@@ -1,0 +1,124 @@
+.premium-tender-page {
+  background:
+    linear-gradient(rgba(104, 165, 135, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(104, 165, 135, 0.035) 1px, transparent 1px),
+    radial-gradient(ellipse at 80% -18%, rgba(25, 129, 102, 0.14), transparent 32rem),
+    #07110f;
+  background-size: 38px 38px, 38px 38px, auto, auto;
+}
+
+.premium-tender-page .premium-kicker { color: #74d8b6; }
+.premium-tender-page .premium-tender-header h1 { color: #f2faf6; }
+.premium-tender-page .premium-tender-header p { color: #a1b4aa; }
+.premium-tender-page .premium-primary-button { border-color: #267d64; background: #16765d; box-shadow: 0 10px 26px rgba(22, 118, 93, .22); }
+.premium-tender-page .premium-outline-button { border-color: #315348; background: #10201a; }
+.premium-tender-page .premium-filter-card { border-color: #203a30; background: rgba(12, 27, 21, .94); }
+.premium-tender-page .premium-field > span { color: #d8e7de; }
+.premium-tender-page .premium-field > div,
+.premium-tender-page .premium-field > select { border-color: #29463a; background: #0b1914; }
+.premium-tender-page .premium-field select option,
+.premium-tender-page .premium-pagination select option { color: #14221b; background: #f5f7f4; }
+.premium-tender-page .premium-results-panel { border-color: #254638; background: rgba(9, 22, 17, .88); }
+.premium-tender-page .premium-tabs button { border-color: #20392e; background: #0d1b15; color: #c5d4cb; }
+.premium-tender-page .premium-tabs button svg { color: #75bb9e; }
+.premium-tender-page .premium-tabs button.is-active { color: #8ee1bf; }
+.premium-tender-page .premium-tabs button i { background: #36a77e; box-shadow: 0 0 18px rgba(54, 167, 126, .35); }
+.premium-tender-page .premium-table { border-color: #20392e; }
+.premium-tender-page .premium-table-head { color: #a9bbb0; background: #0d1b15; }
+.premium-tender-page .premium-results-meta { color: #a1b4aa; }
+
+.premium-tender-page .premium-table-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  padding: 16px;
+  background: #091610;
+}
+
+.premium-tender-page .premium-table-grid .premium-tender-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  min-height: 274px;
+  gap: 15px 14px;
+  border: 1px solid #29473a;
+  border-radius: 7px;
+  padding: 19px;
+  background: linear-gradient(145deg, #11251b 0%, #0d1b15 58%, #12241a 100%);
+  box-shadow: inset 0 1px rgba(235, 255, 243, .04), 0 8px 22px rgba(0, 0, 0, .16);
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.premium-tender-page .premium-table-grid .premium-tender-row:hover,
+.premium-tender-page .premium-table-grid .premium-tender-row:focus-visible {
+  border-color: #58ad89;
+  background: linear-gradient(145deg, #153024, #10231a 58%, #142a20);
+  box-shadow: 0 13px 28px rgba(0, 0, 0, .23), inset 0 1px rgba(235, 255, 243, .07);
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.premium-tender-page .premium-table-grid .premium-tender-details { grid-column: 1 / -1; align-items: start; min-height: 75px; }
+.premium-tender-page .premium-table-grid .premium-category-icon { width: 44px; height: 44px; border: 1px solid #356b53; border-radius: 6px; background: #183b2b; color: #9ce0bb; box-shadow: none; }
+.premium-tender-page .premium-table-grid .premium-tender-row:nth-of-type(3n) .premium-category-icon { background: #173a39; border-color: #32605a; color: #91d9cc; }
+.premium-tender-page .premium-table-grid .premium-tender-row:nth-of-type(4n) .premium-category-icon { background: #3a3020; border-color: #685132; color: #eac585; }
+.premium-tender-page .premium-table-grid .premium-title-line { align-items: flex-start; }
+.premium-tender-page .premium-table-grid .premium-title-line h2 { display: -webkit-box; overflow: hidden; color: #f1f8f3; font-size: 16px; line-height: 1.4; white-space: normal; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.premium-tender-page .premium-table-grid .premium-new-pill { background: #224b37; color: #a8e4bd; }
+.premium-tender-page .premium-table-grid .premium-tender-details p,
+.premium-tender-page .premium-table-grid .premium-department-cell span,
+.premium-tender-page .premium-table-grid .premium-value-cell span,
+.premium-tender-page .premium-table-grid .premium-date-cell span { color: #a3b5aa; font-size: 12px; }
+.premium-tender-page .premium-table-grid .premium-tag-row span { border-color: #335c48; border-radius: 3px; background: #172e22; color: #b2d9c1; }
+.premium-tender-page .premium-table-grid .premium-department-cell,
+.premium-tender-page .premium-table-grid .premium-value-cell,
+.premium-tender-page .premium-table-grid .premium-date-cell,
+.premium-tender-page .premium-table-grid .premium-score-cell,
+.premium-tender-page .premium-table-grid .premium-action-cell { min-width: 0; padding-left: 0; }
+.premium-tender-page .premium-table-grid .premium-department-cell { grid-column: 1 / -1; }
+.premium-tender-page .premium-table-grid .premium-department-cell strong,
+.premium-tender-page .premium-table-grid .premium-value-cell strong,
+.premium-tender-page .premium-table-grid .premium-date-cell strong { color: #e4eee7; white-space: normal; }
+.premium-tender-page .premium-table-grid .premium-value-cell { grid-column: 1; }
+.premium-tender-page .premium-table-grid .premium-date-cell { grid-column: 2; }
+.premium-tender-page .premium-table-grid .premium-date-cell strong { color: #e8cf91; }
+.premium-tender-page .premium-table-grid .premium-score-cell { grid-column: 1; grid-row: auto; justify-items: start; }
+.premium-tender-page .premium-table-grid .premium-score-cell > span { color: #87d6ad; }
+.premium-tender-page .premium-table-grid .premium-action-cell { grid-column: 2; justify-content: flex-end; align-self: end; gap: 7px; }
+.premium-tender-page .premium-table-grid .premium-action-cell button { width: 36px; height: 36px; border-color: #315243; border-radius: 4px; background: #12271c; color: #d0e2d6; }
+.premium-tender-page .premium-table-grid .premium-action-cell button:hover { border-color: #69ba94; background: #1b3c2a; }
+.premium-tender-page .premium-table-grid .premium-action-cell button.is-saved { color: #9be0bb; }
+.premium-tender-page .premium-page-buttons button.is-active { border-color: #348565; background: #16765d; }
+
+.tender-detail-page { padding-top: 20px; }
+.tender-detail-page .detail-back-button { max-width: 1120px; margin: 0 auto 14px; }
+.tender-detail-page .tender-breadcrumb { max-width: 1120px; margin: 0 auto 15px; }
+.tender-detail-page .detail-hero { position: relative; overflow: hidden; border: 1px solid #315646; border-radius: 8px; background: linear-gradient(122deg, #11271d 0%, #14281f 56%, #1b3025 100%); box-shadow: 0 16px 40px rgba(0, 0, 0, .2); }
+.tender-detail-page .detail-hero::after { position: absolute; top: 0; right: 0; width: 5px; height: 100%; background: #4eae83; content: ""; }
+.tender-detail-page .detail-hero .tender-eyebrow { color: #93d8b4; }
+.tender-detail-page .detail-hero h1 { max-width: 760px; color: #f5faf6; font-size: clamp(26px, 3vw, 38px); line-height: 1.15; }
+.tender-detail-page .detail-hero p { max-width: 760px; color: #bdcec3; }
+.tender-detail-page .detail-hero aside { border: 1px solid #365c48; border-radius: 6px; background: #0c1c14; }
+.tender-detail-page .detail-hero aside strong { color: #9fe0bb; }
+.tender-detail-page .detail-hero aside small { color: #b8cbbf; }
+.tender-detail-page .detail-facts article { border: 1px solid #294638; border-radius: 6px; background: #0c1b14; }
+.tender-detail-page .detail-facts article > span { border-radius: 5px; background: #173b2a; color: #8bd6ad; }
+.tender-detail-page .detail-facts strong { color: #e9f2ec; }
+.tender-detail-page .tender-response-panel { max-width: 1120px; margin: 0 auto 20px; border: 1px solid #315646; border-radius: 7px; background: linear-gradient(145deg, #11251b, #0b1913); }
+.tender-detail-page .tender-response-panel h2 { color: #e8f3ec; }
+.tender-detail-page .tender-external-response a { display: inline-flex; align-items: center; gap: 8px; border-radius: 4px; padding: 11px 14px; background: #16765d; color: #fff; text-decoration: none; }
+.tender-detail-page .tender-external-response a:hover { background: #218b6d; }
+.tender-sample-notice { max-width: 1120px; margin: 0 auto 14px; border: 1px solid #806a38; border-radius: 5px; padding: 11px 14px; background: #2a2415; color: #eedcaa; font-size: 13px; }
+
+@media (max-width: 900px) {
+  .premium-tender-page .premium-table-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .premium-tender-page .premium-table-grid { padding: 11px; }
+  .premium-tender-page .premium-table-grid .premium-tender-row { min-height: 0; padding: 15px; }
+  .tender-detail-page .detail-hero { grid-template-columns: 1fr; gap: 16px; padding: 22px; }
+  .tender-detail-page .detail-hero aside { min-height: 130px; }
+  .tender-detail-page .detail-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

@@ -15,6 +15,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import Notifications from "./pages/Notifications";
+import MyTenders from "./pages/MyTenders";
 import RegisterPage from "./pages/RegisterPage";
 import SavedTenders from "./pages/SavedTenders";
 import TenderDetails from "./pages/TenderDetails";
@@ -45,6 +46,8 @@ export default function App() {
                   <Route path="/tenders" element={<TenderList />} />
                   <Route path="/tenders/:id" element={<TenderDetails />} />
                   <Route path="/saved-tenders" element={<SavedTenders />} />
+                  <Route path="/my-tenders" element={<MyTenders />} />
+                  <Route path="/tenders/add" element={<AddTenderPage />} />
                   <Route path="/alerts" element={<Alerts />} />
                   <Route path="/insights" element={<AIInsights />} />
                   <Route path="/notifications" element={<Notifications />} />
@@ -54,7 +57,6 @@ export default function App() {
 
                 <Route element={<ProtectedRoute role="ADMIN" />}>
                   <Route path="/admin" element={<AdminPage />} />
-                  <Route path="/tenders/add" element={<AddTenderPage />} />
                 </Route>
 
                 <Route path="/analytics" element={<Navigate to="/dashboard" replace />} />

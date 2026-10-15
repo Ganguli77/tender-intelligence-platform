@@ -1,5 +1,6 @@
 package com.tender.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -31,6 +32,14 @@ public class Tender {
     private LocalDate publishedDate;
     private LocalDate deadline;
     private String contact;
+
+    @JsonIgnore
+    private String ownerEmail;
+
+    private String submissionMode;
+
+    @Column(length = 1000)
+    private String officialUrl;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(length = 500)
@@ -153,6 +162,30 @@ public class Tender {
 
     public void setContact(String contact) {
         this.contact = contact;
+    }
+
+    public String getOwnerEmail() {
+        return ownerEmail;
+    }
+
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
+    }
+
+    public String getSubmissionMode() {
+        return submissionMode;
+    }
+
+    public void setSubmissionMode(String submissionMode) {
+        this.submissionMode = submissionMode;
+    }
+
+    public String getOfficialUrl() {
+        return officialUrl;
+    }
+
+    public void setOfficialUrl(String officialUrl) {
+        this.officialUrl = officialUrl;
     }
 
     public List<String> getEligibility() {

@@ -2,6 +2,8 @@ package com.tender.backend.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.tender.backend.model.User;
@@ -39,5 +41,20 @@ class UserServiceTest {
 
         assertTrue(authenticated.isPresent());
         assertEquals("admin", authenticated.get().getUsername());
+    }
+
+    @Test
+    void registerShouldIgnoreRequestedAdminRole() {
+        User request = new User();
+        request.setEmail("new-user@example.com");
+        request.setPassword("password123");
+        request.setRole("ADMIN");
+
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User registered = userService.register(request);
+
+        assertEquals("USER", registered.getRole());
+        verify(userRepository).save(any(User.class));
     }
 }

@@ -1,6 +1,6 @@
 // Central API base so every screen talks to the same backend host.
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8081/api";
+  import.meta.env.VITE_API_BASE_URL || "/api";
 
 function getAuthHeaders() {
   if (typeof window === "undefined") {
@@ -56,6 +56,8 @@ export function normalizeTender(tender = {}) {
     eligibility: tender.eligibility || [],
     documents: tender.documents || [],
     description: tender.description || "No description available.",
+    submissionMode: tender.submissionMode || (tender.officialUrl ? "EXTERNAL_LINK" : "INFO_ONLY"),
+    officialUrl: tender.officialUrl || "",
   };
 }
 
@@ -92,9 +94,14 @@ export function normalizeTenderRecommendation(recommendation = {}) {
 async function parseResponse(response) {
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(
-      `API Error ${response.status}: ${text || response.statusText}`
-    );
+    let message = text || response.statusText;
+    try {
+      const body = JSON.parse(text);
+      message = body.message || body.error || message;
+    } catch {
+      // Keep non-JSON response text as the error message.
+    }
+    throw new Error(message || `API Error ${response.status}`);
   }
 
   return response.json();
@@ -232,6 +239,58 @@ export async function createTender(tender) {
 
   const data = await parseResponse(response);
   return normalizeTender(data);
+}
+
+export async function getMyTenders() {
+  const response = await fetch(`${TENDERS_URL}/mine`, { headers: getAuthHeaders() });
+  const data = await parseResponse(response);
+  return Array.isArray(data) ? data.map(normalizeTender) : [];
+}
+
+export async function submitTenderBid(tenderId, submission, files = []) {
+  const formData = new FormData();
+  formData.append("submission", new Blob([JSON.stringify(submission)], { type: "application/json" }));
+  files.forEach((file) => formData.append("files", file));
+
+  const response = await fetch(`${TENDERS_URL}/${tenderId}/submissions`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: formData,
+  });
+  return parseResponse(response);
+}
+
+export async function getTenderSubmissions(tenderId) {
+  const response = await fetch(`${TENDERS_URL}/${tenderId}/submissions`, { headers: getAuthHeaders() });
+  const data = await parseResponse(response);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function downloadBidDocument(tenderId, submissionId, documentId, fileName) {
+  const response = await fetch(`${TENDERS_URL}/${tenderId}/submissions/${submissionId}/documents/${documentId}`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) throw new Error(`Unable to download ${fileName}.`);
+  const url = URL.createObjectURL(await response.blob());
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function getNotifications() {
+  const response = await fetch(`${API_BASE_URL}/notifications`, { headers: getAuthHeaders() });
+  const data = await parseResponse(response);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function markNotificationRead(id) {
+  const response = await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+  });
+  return parseResponse(response);
 }
 
 export async function getTenderInsights() {

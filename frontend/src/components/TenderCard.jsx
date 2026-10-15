@@ -63,6 +63,18 @@ export default function TenderCard({ tender, index = 0, isSaved = false, onView,
   return (
     <motion.article
       className="premium-tender-row"
+      role="link"
+      tabIndex={0}
+      aria-label={`Open tender: ${tender.title || "Untitled tender"}`}
+      onClick={(event) => {
+        if (!event.target.closest("button, a")) onView?.(id);
+      }}
+      onKeyDown={(event) => {
+        if ((event.key === "Enter" || event.key === " ") && event.target === event.currentTarget) {
+          event.preventDefault();
+          onView?.(id);
+        }
+      }}
       layout
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
@@ -119,7 +131,10 @@ export default function TenderCard({ tender, index = 0, isSaved = false, onView,
           className={isSaved ? "is-saved" : ""}
           aria-label={isSaved ? "Remove saved tender" : "Save tender"}
           title={isSaved ? "Saved" : "Save"}
-          onClick={() => onToggleSaved?.(id)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggleSaved?.(id);
+          }}
         >
           <Bookmark size={18} fill={isSaved ? "currentColor" : "none"} />
         </button>

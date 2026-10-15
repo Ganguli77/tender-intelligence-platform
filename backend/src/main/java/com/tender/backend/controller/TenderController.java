@@ -2,8 +2,13 @@ package com.tender.backend.controller;
 
 import com.tender.backend.dto.TenderRequest;
 import com.tender.backend.dto.TenderResponse;
+import com.tender.backend.dto.BidSubmissionRequest;
+import com.tender.backend.dto.BidSubmissionResponse;
+import com.tender.backend.model.BidDocument;
+import com.tender.backend.model.BidSubmission;
 import com.tender.backend.model.Tender;
 import com.tender.backend.repository.TenderRepository;
+import com.tender.backend.service.BidSubmissionService;
 import com.tender.backend.service.TenderAiInsightsService;
 import com.tender.backend.service.TenderAiInsightsService.AiInsights;
 import com.tender.backend.service.TenderAiSummaryService;
@@ -12,6 +17,7 @@ import com.tender.backend.service.TenderRecommendationService;
 import com.tender.backend.service.TenderRecommendationService.TenderRecommendation;
 import com.tender.backend.service.TenderService;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -26,7 +32,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +48,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/tenders")
@@ -47,19 +61,31 @@ public class TenderController {
     private final TenderAiSummaryService tenderAiSummaryService;
     private final TenderAiInsightsService tenderAiInsightsService;
     private final TenderRecommendationService tenderRecommendationService;
+    private final BidSubmissionService bidSubmissionService;
 
     public TenderController(
             TenderRepository tenderRepository,
             TenderService tenderService,
             TenderAiSummaryService tenderAiSummaryService,
             TenderAiInsightsService tenderAiInsightsService,
-            TenderRecommendationService tenderRecommendationService
+            TenderRecommendationService tenderRecommendationService,
+            BidSubmissionService bidSubmissionService
     ) {
         this.tenderRepository = tenderRepository;
         this.tenderService = tenderService;
         this.tenderAiSummaryService = tenderAiSummaryService;
         this.tenderAiInsightsService = tenderAiInsightsService;
         this.tenderRecommendationService = tenderRecommendationService;
+        this.bidSubmissionService = bidSubmissionService;
+    }
+
+    @GetMapping("/mine")
+    @Transactional(readOnly = true)
+    public List<TenderResponse> getMyTenders(Authentication authentication) {
+        return tenderRepository.findByOwnerEmailOrderByPublishedDateDesc(authentication.getName()).stream()
+                .map(this::initializeTenderCollections)
+                .map(TenderResponse::from)
+                .toList();
     }
 
     @GetMapping
@@ -223,6 +249,45 @@ public class TenderController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+            @PostMapping(value = "/{id}/submissions", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+            @Transactional
+            public ResponseEntity<BidSubmissionResponse> submitBid(
+                @PathVariable Long id,
+                @Valid @RequestPart("submission") BidSubmissionRequest request,
+                @RequestPart(value = "files", required = false) List<MultipartFile> files,
+                Authentication authentication
+            ) {
+            Tender tender = tenderRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tender not found"));
+            BidSubmission submission = bidSubmissionService.submit(tender, authentication.getName(), request, files);
+            return ResponseEntity.status(HttpStatus.CREATED).body(BidSubmissionResponse.from(submission));
+            }
+
+            @GetMapping("/{id}/submissions")
+            @Transactional(readOnly = true)
+            public List<BidSubmissionResponse> getTenderSubmissions(@PathVariable Long id, Authentication authentication) {
+            Tender tender = tenderRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tender not found"));
+            requireTenderManager(tender, authentication);
+            return bidSubmissionService.getForTender(id).stream().map(BidSubmissionResponse::from).toList();
+            }
+
+            @GetMapping("/{id}/submissions/{submissionId}/documents/{documentId}")
+            @Transactional(readOnly = true)
+            public ResponseEntity<byte[]> downloadBidDocument(
+                @PathVariable Long id,
+                @PathVariable Long submissionId,
+                @PathVariable Long documentId,
+                Authentication authentication
+            ) {
+            BidDocument document = bidSubmissionService.getDocument(id, submissionId, documentId, authentication);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.attachment().filename(document.getFileName()).build());
+            headers.set("X-Content-Type-Options", "nosniff");
+            return new ResponseEntity<>(document.getContent(), headers, HttpStatus.OK);
+            }
+
     @GetMapping("/{id:\\d+}/ai-summary")
     @Transactional(readOnly = true)
     public ResponseEntity<AiTenderSummary> getTenderAiSummary(@PathVariable Long id) {
@@ -233,8 +298,9 @@ public class TenderController {
     }
 
     @PostMapping
-    public TenderResponse createTender(@Valid @RequestBody TenderRequest request) {
+    public TenderResponse createTender(@Valid @RequestBody TenderRequest request, Authentication authentication) {
         Tender tender = toTender(request);
+        tender.setOwnerEmail(authentication.getName());
         applyDefaults(tender);
         return TenderResponse.from(initializeTenderCollections(tenderRepository.save(tender)));
     }
@@ -242,10 +308,12 @@ public class TenderController {
     @PutMapping("/{id}")
     public ResponseEntity<TenderResponse> updateTender(
             @PathVariable Long id,
-            @Valid @RequestBody TenderRequest request
+            @Valid @RequestBody TenderRequest request,
+            Authentication authentication
     ) {
         return tenderRepository.findById(id)
                 .map(tender -> {
+                requireTenderManager(tender, authentication);
                     copyTenderFields(request, tender);
                     applyDefaults(tender);
                     return ResponseEntity.ok(TenderResponse.from(initializeTenderCollections(tenderRepository.save(tender))));
@@ -254,12 +322,11 @@ public class TenderController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTender(@PathVariable Long id) {
-        if (!tenderRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        tenderRepository.deleteById(id);
+    public ResponseEntity<Void> deleteTender(@PathVariable Long id, Authentication authentication) {
+        Tender tender = tenderRepository.findById(id).orElse(null);
+        if (tender == null) return ResponseEntity.notFound().build();
+        requireTenderManager(tender, authentication);
+        tenderRepository.delete(tender);
         return ResponseEntity.noContent().build();
     }
 
@@ -301,6 +368,8 @@ public class TenderController {
         target.setEligibility(source.eligibility() == null ? List.of() : source.eligibility());
         target.setDocuments(source.documents() == null ? List.of() : source.documents());
         target.setDescription(source.description());
+        target.setSubmissionMode(source.submissionMode());
+        target.setOfficialUrl(source.officialUrl());
     }
 
     private void applyDefaults(Tender tender) {
@@ -324,6 +393,31 @@ public class TenderController {
         }
         if (tender.getReferenceNo() == null || tender.getReferenceNo().isBlank()) {
             tender.setReferenceNo("TND-" + System.currentTimeMillis());
+        }
+        if (tender.getSubmissionMode() == null || tender.getSubmissionMode().isBlank()) {
+            tender.setSubmissionMode("INFO_ONLY");
+        }
+        tender.setSubmissionMode(tender.getSubmissionMode().trim().toUpperCase());
+        if (!Set.of("INFO_ONLY", "EXTERNAL_LINK", "PLATFORM").contains(tender.getSubmissionMode())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Choose a valid bid submission method");
+        }
+        if ("EXTERNAL_LINK".equals(tender.getSubmissionMode())) {
+            try {
+                URI uri = URI.create(tender.getOfficialUrl() == null ? "" : tender.getOfficialUrl().trim());
+                if (uri.getHost() == null || !("https".equalsIgnoreCase(uri.getScheme()) || "http".equalsIgnoreCase(uri.getScheme()))) {
+                    throw new IllegalArgumentException();
+                }
+            } catch (IllegalArgumentException ex) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Enter a valid http or https official tender URL");
+            }
+        }
+    }
+
+    private void requireTenderManager(Tender tender, Authentication authentication) {
+        boolean isPlatformAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+        if (!isPlatformAdmin && (tender.getOwnerEmail() == null || !tender.getOwnerEmail().equalsIgnoreCase(authentication.getName()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the tender owner can manage this tender");
         }
     }
 

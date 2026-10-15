@@ -1,0 +1,115 @@
+.tender-publishing-page {
+  width: min(1080px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 34px 0 72px;
+  color: #17241e;
+}
+
+.publishing-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: none;
+  color: #52625a;
+  cursor: pointer;
+  font: inherit;
+}
+
+.publishing-heading { margin: 28px 0 24px; }
+.publishing-heading > span { color: #147d64; font-size: 12px; font-weight: 800; letter-spacing: 1px; }
+.publishing-heading h1 { margin: 8px 0; font-size: clamp(30px, 4vw, 42px); }
+.publishing-heading p { margin: 0; color: #637169; }
+
+.publishing-form { border-top: 1px solid #dce4de; }
+.publishing-section { padding: 26px 0 30px; border-bottom: 1px solid #dce4de; }
+.publishing-section-heading { display: flex; gap: 16px; margin-bottom: 22px; }
+.publishing-section-heading > span { color: #147d64; font-weight: 800; font-size: 13px; }
+.publishing-section-heading h2 { margin: 0 0 5px; font-size: 19px; }
+.publishing-section-heading p { margin: 0; color: #66736c; font-size: 14px; }
+.publishing-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.publishing-field { display: grid; gap: 7px; color: #34443b; font-size: 13px; font-weight: 700; }
+.publishing-field--wide { grid-column: 1 / -1; }
+.publishing-field input, .publishing-field textarea, .bid-submit-form input, .bid-submit-form textarea { width: 100%; box-sizing: border-box; border: 1px solid #cbd6ce; border-radius: 4px; padding: 11px 12px; background: #fff; color: #17241e; font: inherit; font-weight: 400; }
+.publishing-field input:focus, .publishing-field textarea:focus, .bid-submit-form input:focus, .bid-submit-form textarea:focus { outline: 2px solid #2e9477; outline-offset: 1px; }
+.submission-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.submission-choice { position: relative; display: grid; grid-template-columns: 22px 1fr; gap: 5px 10px; padding: 16px; border: 1px solid #cbd6ce; border-radius: 5px; cursor: pointer; }
+.submission-choice.is-selected { border-color: #168267; background: #f0f8f4; box-shadow: inset 0 0 0 1px #168267; }
+.submission-choice input { grid-row: span 3; margin: 3px 0 0; accent-color: #147d64; }
+.submission-choice svg { color: #147d64; }
+.submission-choice strong { font-size: 14px; }
+.submission-choice span { color: #65736b; font-size: 13px; }
+.official-link-field { margin-top: 18px; }
+.publishing-error { color: #a72c2c; }
+.publishing-actions { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 0; color: #637169; font-size: 13px; }
+.publishing-actions button, .bid-submit-form > button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; border: 0; border-radius: 4px; padding: 12px 17px; background: #147d64; color: white; cursor: pointer; font: inherit; font-weight: 700; }
+.publishing-actions button:disabled, .bid-submit-form > button:disabled { cursor: wait; opacity: .65; }
+.tender-external-response a { display: inline-flex; align-items: center; gap: 8px; color: #126f59; font-weight: 700; }
+.bid-submit-form > p { color: #66736c; font-size: 14px; }
+.bid-submit-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.bid-submit-grid > label { display: grid; gap: 7px; color: #34443b; font-size: 13px; font-weight: 700; }
+.bid-submit-wide { grid-column: 1 / -1; }
+.bid-file-field { display: flex !important; align-items: center; gap: 12px !important; border: 1px dashed #9cb3a5; border-radius: 5px; padding: 14px; cursor: pointer; }
+.bid-file-field svg { color: #147d64; }
+.bid-file-field span { display: grid; gap: 3px; }
+.bid-file-field small { color: #69776f; font-weight: 400; }
+.bid-file-field input { margin-left: auto; max-width: 270px; padding: 0; border: 0; }
+.bid-file-list, .bid-submit-status { color: #147d64 !important; font-size: 13px; }
+.bid-submit-form > button { margin-top: 12px; }
+.organizer-heading { margin-top: 14px; }
+.workspace-notice { color: #147d64 !important; font-weight: 700; }
+.workspace-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 16px 0; border-top: 1px solid #dce4de; border-bottom: 1px solid #dce4de; }
+.workspace-toolbar > span, .workspace-toolbar > a { display: inline-flex; align-items: center; gap: 8px; }
+.workspace-toolbar > span { color: #59675f; }
+.workspace-toolbar > a { color: #126f59; font-weight: 700; }
+.workspace-tender-list { display: grid; }
+.workspace-tender { padding: 21px 0; border-bottom: 1px solid #dce4de; }
+.workspace-tender-main { display: flex; justify-content: space-between; gap: 24px; }
+.workspace-category { color: #147d64; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.workspace-tender h2 { margin: 6px 0; font-size: 19px; }
+.workspace-tender-main p { margin: 0; color: #65736b; font-size: 14px; }
+.workspace-tender-meta { display: flex; gap: 24px; color: #65736b; font-size: 12px; }
+.workspace-tender-meta span { display: grid; align-content: start; gap: 6px; }
+.workspace-tender-meta strong { color: #25352c; font-size: 13px; }
+.workspace-tender-actions { display: flex; flex-wrap: wrap; gap: 17px; margin-top: 16px; }
+.workspace-tender-actions a, .workspace-tender-actions button { display: inline-flex; align-items: center; gap: 6px; border: 0; padding: 0; background: none; color: #126f59; cursor: pointer; font: inherit; font-size: 13px; font-weight: 700; text-decoration: none; }
+.workspace-submissions { margin-top: 20px; padding: 18px; border-left: 3px solid #168267; background: #f3f8f5; }
+.workspace-submissions h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; font-size: 16px; }
+.workspace-submission { padding: 15px 0; border-top: 1px solid #d9e4dc; }
+.workspace-submission-heading { display: flex; justify-content: space-between; gap: 16px; }
+.workspace-submission-heading > div { display: grid; gap: 5px; }
+.workspace-submission-heading span, .workspace-submission-heading small { color: #637169; font-size: 12px; }
+.workspace-proposal { max-width: 800px; color: #394940; white-space: pre-wrap; }
+.workspace-proposal-amount { color: #147d64; font-weight: 700; }
+.workspace-documents { display: flex; flex-wrap: wrap; gap: 8px; }
+.workspace-documents button { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #cbd6ce; border-radius: 4px; padding: 7px 9px; background: white; color: #35453b; cursor: pointer; }
+.workspace-empty { display: grid; justify-items: start; gap: 9px; margin-top: 24px; padding: 24px 0; color: #66736c; }
+.workspace-empty svg { color: #147d64; }
+.workspace-empty h2 { margin: 0; color: #17241e; font-size: 19px; }
+.workspace-empty p { margin: 0; }
+.workspace-empty a { margin-top: 5px; color: #126f59; font-weight: 700; }
+.notification-list { display: grid; gap: 0; }
+.notification-item { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; align-items: start; gap: 14px; padding: 18px 0; border-bottom: 1px solid #dce4de; }
+.notification-item.is-unread { background: #f3f8f5; }
+.notification-item-icon { display: grid; place-items: center; width: 36px; aspect-ratio: 1; border-radius: 50%; background: #e1f0e9; color: #147d64; }
+.notification-item-copy strong { color: #203128; }
+.notification-item-copy p { margin: 5px 0; color: #5f6d65; }
+.notification-item-copy time { color: #758179; font-size: 12px; }
+.notification-item-actions { display: flex; align-items: center; gap: 12px; }
+.notification-item-actions a { color: #126f59; font-weight: 700; font-size: 13px; white-space: nowrap; }
+.notification-item-actions button { display: grid; place-items: center; width: 34px; aspect-ratio: 1; border: 1px solid #cad6ce; border-radius: 4px; background: white; color: #147d64; cursor: pointer; }
+
+@media (max-width: 650px) {
+  .tender-publishing-page { width: min(100% - 28px, 1080px); }
+  .publishing-grid, .submission-choice-grid, .bid-submit-grid { grid-template-columns: 1fr; }
+  .publishing-field--wide, .bid-submit-wide { grid-column: auto; }
+  .publishing-actions { align-items: flex-start; flex-direction: column; }
+  .publishing-actions button { width: 100%; }
+  .bid-file-field { align-items: flex-start !important; flex-wrap: wrap; }
+  .bid-file-field input { margin-left: 0; width: 100%; max-width: none; }
+  .workspace-toolbar, .workspace-tender-main { align-items: flex-start; flex-direction: column; }
+  .workspace-tender-meta { gap: 16px; }
+  .workspace-submission-heading { flex-direction: column; }
+  .notification-item { grid-template-columns: 34px minmax(0, 1fr); }
+  .notification-item-actions { grid-column: 2; }
+}

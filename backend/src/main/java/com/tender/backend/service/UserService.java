@@ -37,7 +37,7 @@ public class UserService {
         user.setEmail(email.trim().toLowerCase());
         user.setPicture(input.getPicture());
         user.setPassword(passwordEncoder.encode(input.getPassword()));
-        user.setRole(input.getRole());
+        user.setRole("USER");
         return userRepository.save(user);
     }
 

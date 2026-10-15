@@ -1,4 +1,4 @@
-import { Bell, Bookmark, LayoutDashboard, LogOut, Settings, ShieldCheck, UserRound } from "lucide-react";
+import { Bell, Bookmark, BriefcaseBusiness, LayoutDashboard, LogOut, Settings, ShieldCheck, UserRound } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
@@ -85,6 +85,10 @@ export default function ProfileDropdown({ onNavigate }) {
             <button type="button" role="menuitem" onClick={() => handleNavigate("/saved-tenders")}>
               <Bookmark size={16} />
               Saved Tenders
+            </button>
+            <button type="button" role="menuitem" onClick={() => handleNavigate("/my-tenders")}>
+              <BriefcaseBusiness size={16} />
+              My Tenders
             </button>
             <button type="button" role="menuitem" onClick={() => handleNavigate("/alerts")}>
               <Bell size={16} />

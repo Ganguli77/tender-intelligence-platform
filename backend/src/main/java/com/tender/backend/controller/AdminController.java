@@ -119,9 +119,10 @@ public class AdminController {
     }
 
     @PostMapping("/tenders")
-    public TenderResponse createTender(@Valid @RequestBody TenderRequest request) {
+    public TenderResponse createTender(@Valid @RequestBody TenderRequest request, java.security.Principal principal) {
         Tender tender = new Tender();
         copyTender(request, tender);
+        tender.setOwnerEmail(principal.getName());
         applyDefaults(tender);
         return TenderResponse.from(tenderRepository.save(tender));
     }
@@ -216,6 +217,8 @@ public class AdminController {
         target.setEligibility(source.eligibility() == null ? List.of() : source.eligibility());
         target.setDocuments(source.documents() == null ? List.of() : source.documents());
         target.setDescription(source.description());
+        target.setSubmissionMode(source.submissionMode());
+        target.setOfficialUrl(source.officialUrl());
     }
 
     private void applyDefaults(Tender tender) {
@@ -225,5 +228,6 @@ public class AdminController {
         if (tender.getAmountValue() == null) tender.setAmountValue(0L);
         if (tender.getReferenceNo() == null || tender.getReferenceNo().isBlank()) tender.setReferenceNo("TND-" + System.currentTimeMillis());
         if (tender.getAmount() == null || tender.getAmount().isBlank()) tender.setAmount("Value on request");
+        if (tender.getSubmissionMode() == null || tender.getSubmissionMode().isBlank()) tender.setSubmissionMode("INFO_ONLY");
     }
 }

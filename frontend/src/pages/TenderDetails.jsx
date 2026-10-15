@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { BellPlus, Bookmark, Building2, CalendarDays, ChevronLeft, Download, FileText, Mail, MapPin, Phone, Tags } from "lucide-react";
+import { BellPlus, Bookmark, Building2, CalendarDays, ChevronLeft, Download, ExternalLink, FileText, Mail, MapPin, Phone, Tags } from "lucide-react";
 import AIAnalysisPanel from "../components/AIAnalysisPanel";
 import RecommendationCard from "../components/RecommendationCard";
+import BidSubmissionForm from "../components/tenders/BidSubmissionForm";
+import { tenders as fallbackTenders } from "../data/tenders";
+import { normalizeTender } from "../api/tenders";
 import {
   createAlert,
   getTender,
@@ -12,6 +15,7 @@ import {
   saveTender,
 } from "../api/tenders";
 import "./TenderPages.css";
+import "./TenderMarketplace.css";
 
 export default function TenderDetails() {
   const { id } = useParams();
@@ -22,11 +26,15 @@ export default function TenderDetails() {
   const [recommendation, setRecommendation] = useState(null);
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [showingSample, setShowingSample] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
     async function loadTender() {
+      setLoading(true);
+      setShowingSample(false);
       try {
         const tenderData = await getTender(id);
         if (!mounted) return;
@@ -45,8 +53,21 @@ export default function TenderDetails() {
         if (recommendationsResult.status === "fulfilled") setRecommendation(recommendationsResult.value[0]);
       } catch {
         if (mounted) {
-          setError("Unable to load tender details.");
-          setTender(null);
+          const fallback = fallbackTenders.find((item) =>
+            [item.id, item.referenceNo].some((value) => String(value) === String(id))
+          );
+          if (fallback) {
+            setTender(normalizeTender(fallback));
+            setShowingSample(true);
+            setError("");
+          } else {
+            setError("We could not find this tender. It may have been removed or is temporarily unavailable.");
+            setTender(null);
+          }
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
         }
       }
     }
@@ -104,10 +125,10 @@ export default function TenderDetails() {
 
   if (!tender) {
     return (
-      <main className="tender-page">
+      <main className="tender-page tender-detail-page">
         <section className="empty-state">
           <span className="tender-eyebrow">Tender intelligence</span>
-          <h1>{error || "Loading tender details..."}</h1>
+          <h1>{loading ? "Loading tender details..." : error}</h1>
           <button className="secondary-filter-button" type="button" onClick={() => navigate(-1)}>
             <ChevronLeft size={18} /> Go Back
           </button>
@@ -117,7 +138,7 @@ export default function TenderDetails() {
   }
 
   return (
-    <main className="tender-page">
+    <main className="tender-page tender-detail-page">
       <button className="secondary-filter-button detail-back-button" type="button" onClick={() => navigate(-1)}>
         <ChevronLeft size={18} /> Back
       </button>
@@ -133,6 +154,12 @@ export default function TenderDetails() {
           <li aria-current="page">{tender.title || "Tender details"}</li>
         </ol>
       </nav>
+
+      {showingSample ? (
+        <p className="tender-sample-notice" role="status">
+          Sample listing shown because live tender details are unavailable. Actions may not work for this sample.
+        </p>
+      ) : null}
 
       <section className="detail-hero">
         <div>
@@ -158,6 +185,20 @@ export default function TenderDetails() {
         <article><Tags size={18} /><span>Category</span><strong>{tender.category}</strong></article>
         <article><MapPin size={18} /><span>Location</span><strong>{tender.location}</strong></article>
         <article><CalendarDays size={18} /><span>Deadline</span><strong>{tender.deadline}</strong></article>
+      </section>
+
+      <section className="detail-panel tender-response-panel">
+        <h2><FileText size={20} /> Respond to this tender</h2>
+        {tender.submissionMode === "PLATFORM" ? (
+          <BidSubmissionForm tender={tender} />
+        ) : tender.submissionMode === "EXTERNAL_LINK" && tender.officialUrl ? (
+          <div className="tender-external-response">
+            <p>Bid submission is handled by {tender.organization}. Continue to its official tender portal.</p>
+            <a href={tender.officialUrl} target="_blank" rel="noreferrer"><ExternalLink size={17} /> Open official tender portal</a>
+          </div>
+        ) : (
+          <p>This listing does not accept bids on NexTender. Contact {tender.organization} for official submission instructions.</p>
+        )}
       </section>
 
       <div className="detail-content">

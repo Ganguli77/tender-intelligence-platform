@@ -27,6 +27,7 @@ import TenderSkeleton from "../components/tenders/TenderSkeleton";
 import TenderTabs from "../components/tenders/TenderTabs";
 import { tenders as fallbackTenders } from "../data/tenders";
 import "./TenderPages.css";
+import "./TenderMarketplace.css";
 
 const initialFilters = {
   searchTerm: "",
@@ -156,7 +157,7 @@ export default function TenderList() {
   const [statusTab, setStatusTab] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [viewMode, setViewMode] = useState("list");
+  const [viewMode, setViewMode] = useState("grid");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [savedIds, setSavedIds] = useState(() => {
@@ -168,8 +169,8 @@ export default function TenderList() {
   });
 
   useEffect(() => {
+    const controller = new AbortController();
     const timeout = window.setTimeout(() => {
-      const controller = new AbortController();
       async function loadTenders() {
         setLoading(true);
         setError("");
@@ -190,7 +191,7 @@ export default function TenderList() {
             },
             { signal: controller.signal }
           );
-          setAllTenders(tenders.map(normalizeTenderForMarketplace));
+          setAllTenders(tenders);
         } catch (loadError) {
           if (loadError.name !== "AbortError") {
             setAllTenders(fallbackTenders.map(normalizeTenderForMarketplace));
@@ -202,10 +203,12 @@ export default function TenderList() {
       }
 
       loadTenders();
-      return () => controller.abort();
     }, 220);
 
-    return () => window.clearTimeout(timeout);
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
   }, [
     filters.searchTerm,
     filters.category,

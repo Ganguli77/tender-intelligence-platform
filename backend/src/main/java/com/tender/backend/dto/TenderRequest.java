@@ -41,6 +41,11 @@ public record TenderRequest(
         List<String> documents,
 
         @Size(max = 4000, message = "Description must be under 4000 characters")
-        String description
+        String description,
+
+        String submissionMode,
+
+        @Size(max = 1000, message = "Official URL must be under 1000 characters")
+        String officialUrl
 ) {
 }

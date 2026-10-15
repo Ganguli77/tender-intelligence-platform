@@ -47,6 +47,19 @@ function toBackendParams(params = {}) {
 }
 
 export async function getTenderMarketplace(params = {}, options = {}) {
-  const tenders = await getTenders(toBackendParams(params), options);
+  const tenders = [];
+  const pageSize = 50;
+  let page = 0;
+  let pageItems;
+
+  do {
+    pageItems = await getTenders(
+      { ...toBackendParams(params), page, size: pageSize },
+      options
+    );
+    tenders.push(...pageItems);
+    page += 1;
+  } while (pageItems.length === pageSize);
+
   return tenders.map(normalizeTenderForMarketplace);
 }
