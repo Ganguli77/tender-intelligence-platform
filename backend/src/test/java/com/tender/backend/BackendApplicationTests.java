@@ -28,6 +28,8 @@ class BackendApplicationTests {
 		authService.register(registration);
 
 		assertTrue(authService.login("LOGIN-TEST-USER", "password123").isPresent());
+		assertTrue(authService.login("LOGIN-TEST@EXAMPLE.COM", "password123").isPresent());
+		assertTrue(authService.login("missing-login-user", "password123").isEmpty());
 	}
 
 }
