@@ -3,6 +3,7 @@ package com.tender.backend.service;
 import com.tender.backend.dto.ActivityDTO;
 import com.tender.backend.dto.DashboardStatsDTO;
 import com.tender.backend.dto.OpportunityDistributionDTO;
+import com.tender.backend.dto.RegionalTenderActivityDTO;
 import com.tender.backend.dto.RecentTenderDTO;
 import com.tender.backend.dto.TenderStatusDTO;
 import com.tender.backend.model.AIAnalysis;
@@ -17,7 +18,10 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
@@ -97,6 +101,48 @@ public class DashboardService {
                 new OpportunityDistributionDTO("Medium", "60-79", aiAnalysisRepository.countByOpportunityScoreBetween(MEDIUM_SCORE, HIGH_SCORE - 1)),
                 new OpportunityDistributionDTO("Low", "<60", aiAnalysisRepository.countByOpportunityScoreLessThan(MEDIUM_SCORE))
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<RegionalTenderActivityDTO> getRegionalTenderActivity() {
+        Map<String, long[]> activityByState = new LinkedHashMap<>();
+        List<String> states = List.of(
+                "Andaman & Nicobar Islands", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar",
+                "Chandigarh", "Chhattisgarh", "Dadra & Nagar Haveli and Daman & Diu", "Delhi", "Goa",
+                "Gujarat", "Haryana", "Himachal Pradesh", "Jammu & Kashmir", "Jharkhand", "Karnataka",
+                "Kerala", "Ladakh", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur",
+                "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Puducherry", "Punjab", "Rajasthan",
+                "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand",
+                "West Bengal"
+        );
+
+        for (Tender tender : tenderRepository.findAll()) {
+            if (tender.getDeadline() != null && tender.getDeadline().isBefore(LocalDate.now())) {
+                continue;
+            }
+            String location = tender.getLocation();
+            if (location == null || location.isBlank()) {
+                continue;
+            }
+
+            String normalizedLocation = location.toLowerCase(Locale.ROOT);
+            String state = states.stream()
+                    .filter(candidate -> normalizedLocation.contains(candidate.toLowerCase(Locale.ROOT)))
+                    .findFirst()
+                    .orElse(null);
+            if (state == null) {
+                continue;
+            }
+
+            long[] totals = activityByState.computeIfAbsent(state, ignored -> new long[2]);
+            totals[0]++;
+            totals[1] += tender.getAmountValue() == null ? 0 : tender.getAmountValue();
+        }
+
+        return activityByState.entrySet().stream()
+                .map(entry -> new RegionalTenderActivityDTO(entry.getKey(), entry.getValue()[0], entry.getValue()[1]))
+                .sorted(Comparator.comparingLong(RegionalTenderActivityDTO::tenderCount).reversed())
+                .toList();
     }
 
     @Transactional(readOnly = true)

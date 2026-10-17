@@ -3,6 +3,7 @@ package com.tender.backend.controller;
 import com.tender.backend.dto.ActivityDTO;
 import com.tender.backend.dto.DashboardStatsDTO;
 import com.tender.backend.dto.OpportunityDistributionDTO;
+import com.tender.backend.dto.RegionalTenderActivityDTO;
 import com.tender.backend.dto.RecentTenderDTO;
 import com.tender.backend.dto.TenderStatusDTO;
 import com.tender.backend.service.DashboardService;
@@ -35,6 +36,11 @@ public class DashboardController {
     @GetMapping("/opportunities")
     public List<OpportunityDistributionDTO> getOpportunities() {
         return dashboardService.getOpportunityDistribution();
+    }
+
+    @GetMapping("/regions")
+    public List<RegionalTenderActivityDTO> getRegionalActivity() {
+        return dashboardService.getRegionalTenderActivity();
     }
 
     @GetMapping("/recent")

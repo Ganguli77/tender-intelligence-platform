@@ -4,6 +4,7 @@ import com.tender.backend.dto.AuthDtos.LoginRequest;
 import com.tender.backend.dto.AuthDtos.RegisterRequest;
 import com.tender.backend.model.User;
 import com.tender.backend.service.AuthService;
+import com.tender.backend.service.FirebasePhoneAuthService;
 import com.tender.backend.service.PasswordResetService;
 import jakarta.validation.Valid;
 import java.util.Map;
@@ -21,10 +22,16 @@ public class AuthController {
 
     private final AuthService authService;
     private final PasswordResetService passwordResetService;
+    private final FirebasePhoneAuthService firebasePhoneAuthService;
 
-    public AuthController(AuthService authService, PasswordResetService passwordResetService) {
+    public AuthController(
+            AuthService authService,
+            PasswordResetService passwordResetService,
+            FirebasePhoneAuthService firebasePhoneAuthService
+    ) {
         this.authService = authService;
         this.passwordResetService = passwordResetService;
+        this.firebasePhoneAuthService = firebasePhoneAuthService;
     }
 
     @PostMapping("/register")
@@ -64,6 +71,19 @@ public class AuthController {
             return ResponseEntity.ok(authService.loginWithGoogle(googleToken));
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/phone")
+    public ResponseEntity<?> phoneLogin(@RequestBody Map<String, String> request) {
+        String idToken = request.get("idToken");
+        try {
+            String phoneNumber = firebasePhoneAuthService.verifyPhoneIdToken(idToken);
+            return ResponseEntity.ok(authService.loginWithPhone(phoneNumber));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", ex.getMessage()));
+        } catch (IllegalStateException ex) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(Map.of("message", ex.getMessage()));
         }
     }
 

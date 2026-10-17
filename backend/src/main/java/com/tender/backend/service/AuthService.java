@@ -12,6 +12,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 @Service
 public class AuthService {
@@ -94,6 +95,12 @@ public class AuthService {
         return Optional.empty();
     }
 
+    public AuthResponse loginWithPhone(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber)
+                .map(this::buildResponse)
+                .orElseGet(() -> createPhoneUser(phoneNumber));
+    }
+
     private boolean isBcryptHash(String password) {
         return password.startsWith("$2a$") || password.startsWith("$2b$") || password.startsWith("$2y$");
     }
@@ -103,14 +110,19 @@ public class AuthService {
             throw new IllegalArgumentException("Google authentication is not configured");
         }
 
-        Map<String, Object> tokenInfo = googleClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/tokeninfo")
-                        .queryParam("id_token", idToken)
-                        .build())
-                .retrieve()
-                .body(new ParameterizedTypeReference<>() {
-                });
+        Map<String, Object> tokenInfo;
+        try {
+            tokenInfo = googleClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/tokeninfo")
+                            .queryParam("id_token", idToken)
+                            .build())
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {
+                    });
+        } catch (RestClientResponseException exception) {
+            throw new IllegalArgumentException("Invalid Google ID token");
+        }
 
         if (tokenInfo == null || tokenInfo.get("error") != null) {
             throw new IllegalArgumentException("Invalid Google ID token");
@@ -151,6 +163,16 @@ public class AuthService {
 
     public AuthResponse buildResponse(User user) {
         return new AuthResponse(jwtService.generateToken(user), UserDto.from(user));
+    }
+
+    private AuthResponse createPhoneUser(String phoneNumber) {
+        User user = new User();
+        user.setName("Phone user");
+        user.setUsername("phone-user-" + UUID.randomUUID());
+        user.setPhoneNumber(phoneNumber);
+        user.setPassword(passwordEncoder.encode("PHONE:" + UUID.randomUUID()));
+        user.setRole(User.Role.USER);
+        return buildResponse(userRepository.save(user));
     }
 
     private User createGoogleUser(Map<String, Object> tokenInfo, String email) {
@@ -198,12 +220,13 @@ public class AuthService {
         }
     }
 
-    public record UserDto(Long id, String name, String email, String picture, String role, String createdAt) {
+    public record UserDto(Long id, String name, String email, String phoneNumber, String picture, String role, String createdAt) {
         static UserDto from(User user) {
             return new UserDto(
                     user.getId(),
                     user.getName(),
                     user.getEmail(),
+                    user.getPhoneNumber(),
                     user.getPicture(),
                     user.getRole(),
                     user.getCreatedAt() == null ? null : user.getCreatedAt().toString()

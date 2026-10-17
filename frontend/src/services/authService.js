@@ -27,9 +27,15 @@ export async function loginWithGoogle(token) {
   return response.data;
 }
 
+export async function loginWithPhone(idToken) {
+  const response = await api.post(`${AUTH_BASE_URL}/phone`, { idToken });
+  return response.data;
+}
+
 export default {
   login,
   loginWithGoogle,
+  loginWithPhone,
   register,
   requestPasswordReset,
   resetPassword,

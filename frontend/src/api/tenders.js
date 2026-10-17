@@ -108,7 +108,7 @@ async function parseResponse(response) {
 }
 
 function buildUrl(baseUrl, params = {}) {
-  const url = new URL(baseUrl);
+  const url = new URL(baseUrl, typeof window === "undefined" ? "http://localhost" : window.location.origin);
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "" && value !== "ALL") {

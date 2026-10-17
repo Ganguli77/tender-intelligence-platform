@@ -35,6 +35,7 @@ function normalizeUser(session = {}) {
     id: user.id ?? session.id ?? null,
     name,
     email,
+    phoneNumber: user.phoneNumber || session.phoneNumber || "",
     picture: user.picture || session.picture || "",
     role: normalizeRole(user.role || session.role),
   };

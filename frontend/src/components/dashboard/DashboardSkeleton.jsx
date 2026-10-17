@@ -7,11 +7,8 @@ export default function DashboardSkeleton() {
           <div className="dashboard-skeleton-block dashboard-skeleton-card" key={index} />
         ))}
       </section>
-      <section className="dashboard-v2-middle">
-        <div className="dashboard-skeleton-block dashboard-skeleton-panel" />
-        <div className="dashboard-skeleton-block dashboard-skeleton-panel" />
-      </section>
-      <section className="dashboard-v2-bottom">
+      <section className="dashboard-v2-analysis">
+        <div className="dashboard-skeleton-block dashboard-skeleton-panel dashboard-skeleton-map" />
         <div className="dashboard-skeleton-block dashboard-skeleton-panel" />
         <div className="dashboard-skeleton-block dashboard-skeleton-panel" />
       </section>

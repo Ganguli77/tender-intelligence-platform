@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { AlertTriangle, BarChart3, BookmarkCheck, BriefcaseBusiness, CalendarDays, RefreshCw, Sparkles } from "lucide-react";
-import ActivityFeed from "../components/dashboard/ActivityFeed";
 import DashboardSkeleton from "../components/dashboard/DashboardSkeleton";
+import DashboardRegionalMap from "../components/dashboard/DashboardRegionalMap";
 import OpportunityBarChart from "../components/dashboard/OpportunityBarChart";
 import RecentTendersCard from "../components/dashboard/RecentTendersCard";
 import StatsCard from "../components/dashboard/StatsCard";
 import StatusPieChart from "../components/dashboard/StatusPieChart";
 import { getDashboardData } from "../api/dashboardApi";
+import { useAuth } from "../context/useAuth";
 import "./Dashboard.css";
 
 const emptyDashboard = {
   stats: null,
   status: null,
+  regions: [],
+  regionsError: "",
   opportunities: [],
   recentTenders: [],
   activity: [],
@@ -22,7 +25,16 @@ function formatNumber(value) {
   return new Intl.NumberFormat("en-IN").format(Number(value || 0));
 }
 
+function getDashboardDateRange() {
+  const end = new Date();
+  const start = new Date(end);
+  start.setDate(end.getDate() - 7);
+  const format = (date) => new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+  return `${format(start)} - ${format(end)}`;
+}
+
 export default function DashboardPage() {
+  const { user } = useAuth();
   const [dashboard, setDashboard] = useState(emptyDashboard);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -88,21 +100,21 @@ export default function DashboardPage() {
       accent: "cyan",
     },
     {
-      title: "Active",
+      title: "Active Bids",
       value: formatNumber(stats.activeTenders),
       trend: stats.activeTrend || "+8%",
       icon: BarChart3,
       accent: "green",
     },
     {
-      title: "Saved",
+      title: "Saved / Watchlisted",
       value: formatNumber(stats.savedTenders),
       trend: stats.savedTrend || "+3 today",
       icon: BookmarkCheck,
       accent: "yellow",
     },
     {
-      title: "AI Matches",
+      title: "AI Opportunities",
       value: formatNumber(stats.aiMatches),
       trend: stats.aiMatchesTrend || "Strong fit",
       icon: Sparkles,
@@ -114,18 +126,18 @@ export default function DashboardPage() {
     <main className="dashboard-v2-page">
       <motion.section
         className="dashboard-v2-hero"
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.42 }}
       >
         <div>
           <h1>AI Tender Intelligence Dashboard</h1>
           <p>
-            Welcome back. Here&apos;s what&apos;s happening with your tender opportunities today.
+            Welcome back, {user?.name || "there"}. Here&apos;s what&apos;s happening with your tender opportunities today.
           </p>
         </div>
         <div className="dashboard-v2-hero-actions">
-          <span><CalendarDays size={16} /> 14 May 2025 - 21 May 2025</span>
+          <span><CalendarDays size={16} /> {getDashboardDateRange()}</span>
           <button
             className={refreshing ? "is-refreshing" : ""}
             type="button"
@@ -153,14 +165,13 @@ export default function DashboardPage() {
         ))}
       </section>
 
-      <section className="dashboard-v2-middle">
-        <StatusPieChart status={dashboard.status} />
-        <OpportunityBarChart data={dashboard.opportunities} />
-      </section>
-
-      <section className="dashboard-v2-bottom">
+      <section className="dashboard-v2-analysis">
+        <DashboardRegionalMap regions={dashboard.regions} error={dashboard.regionsError} />
+        <div className="dashboard-v2-chart-stack">
+          <StatusPieChart status={dashboard.status} />
+          <OpportunityBarChart data={dashboard.opportunities} />
+        </div>
         <RecentTendersCard tenders={dashboard.recentTenders} />
-        <ActivityFeed activity={dashboard.activity} />
       </section>
     </main>
   );

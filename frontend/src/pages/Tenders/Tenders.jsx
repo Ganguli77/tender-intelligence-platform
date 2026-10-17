@@ -1,19 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   AlertCircle,
-  ArrowDownUp,
+  ArrowUpRight,
   BookmarkCheck,
-  Calendar,
-  Filter,
+  CalendarDays,
+  Check,
+  Clock3,
+  Leaf,
+  RefreshCw,
   RotateCcw,
   Search,
-  SlidersHorizontal,
+  Sparkles,
+  Settings2,
+  Zap,
   X,
 } from "lucide-react";
 
 import { getSavedTenders as getBackendSavedTenders, getTenders, removeSavedTender, saveTender } from "../../api/tenders";
-import TenderCard from "../../components/cards/TenderCard";
-import Pagination from "../../components/common/Pagination";
 import { tenders as fallbackTenders } from "../../data/tenders";
 import {
   getSavedTenderIds,
@@ -24,7 +28,7 @@ import {
 } from "../../utils/savedTenders";
 import "./Tenders.css";
 
-const ITEMS_PER_PAGE = 12;
+const FEED_LIMIT = 5;
 
 const initialFilters = {
   state: "",
@@ -38,14 +42,6 @@ const initialFilters = {
   minAiScore: "",
   maxAiScore: "",
 };
-
-const sortOptions = [
-  { value: "closingSoon", label: "Closing Soon" },
-  { value: "highestValue", label: "Highest Value" },
-  { value: "aiScore", label: "AI Score" },
-  { value: "recentlyAdded", label: "Recently Added" },
-  { value: "mostViewed", label: "Most Viewed" },
-];
 
 function normalizeForMarketplace(tender, index) {
   const source = tender || {};
@@ -119,6 +115,46 @@ function isBeforeOrSame(value, selectedDate) {
   return parseDate(value) <= parseDate(selectedDate);
 }
 
+function daysUntil(value) {
+  const deadline = value ? new Date(value) : null;
+  if (!deadline || Number.isNaN(deadline.getTime())) return null;
+  return Math.ceil((deadline.setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 86400000);
+}
+
+function formatValue(tender) {
+  const amount = Number(tender.amountValue);
+  if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
+  if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
+  if (amount > 0) return `₹${new Intl.NumberFormat("en-IN").format(amount)}`;
+  return tender.amount || "Value undisclosed";
+}
+
+function formatClosingDate(value) {
+  const days = daysUntil(value);
+  if (days !== null && days >= 0) return `${days} Days Left`;
+  if (days !== null) return "Closed";
+  if (!value || value === "Not specified") return "Not specified";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+}
+
+function getMarketplaceStatus(tender) {
+  const days = daysUntil(tender.deadline);
+  if (days !== null && days < 0) return "Closed";
+  if (days !== null && days <= 30) return "Closing Soon";
+  return tender.status || (days === null ? "New" : "Active");
+}
+
+function formatMarketplaceDateRange() {
+  const end = new Date();
+  const start = new Date(end);
+  start.setDate(start.getDate() - 7);
+  const format = (date) => new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+  return `${format(start)} - ${format(end)}`;
+}
+
 function applySort(tenders, sortBy) {
   const sorted = [...tenders];
 
@@ -138,7 +174,12 @@ function applySort(tenders, sortBy) {
     return sorted.sort((a, b) => b.views - a.views);
   }
 
-  return sorted.sort((a, b) => parseDate(a.deadline) - parseDate(b.deadline));
+  return sorted.sort((a, b) => {
+    const aDays = daysUntil(a.deadline);
+    const bDays = daysUntil(b.deadline);
+    return (aDays === null || aDays < 0 ? Number.MAX_SAFE_INTEGER : aDays)
+      - (bDays === null || bDays < 0 ? Number.MAX_SAFE_INTEGER : bDays);
+  });
 }
 
 function FilterPanel({ filters, options, onFilterChange, onReset, onClose }) {
@@ -287,34 +328,19 @@ function FilterPanel({ filters, options, onFilterChange, onReset, onClose }) {
   );
 }
 
-function SkeletonGrid() {
-  return (
-    <div className="tenders-grid" aria-label="Loading tenders">
-      {Array.from({ length: ITEMS_PER_PAGE }, (_, index) => (
-        <article className="tender-skeleton" key={index}>
-          <span />
-          <strong />
-          <p />
-          <p />
-          <div />
-        </article>
-      ))}
-    </div>
-  );
-}
-
 export default function Tenders() {
   const [allTenders, setAllTenders] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState(initialFilters);
-  const [sortBy, setSortBy] = useState("closingSoon");
-  const [currentPage, setCurrentPage] = useState(1);
   const [savedTenderIds, setSavedTenderIds] = useState(getSavedTenderIds);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [saveStatus, setSaveStatus] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isTabletFilterOpen, setIsTabletFilterOpen] = useState(true);
+  const [valueBand, setValueBand] = useState("");
+  const [quickFilters, setQuickFilters] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let isMounted = true;
@@ -338,6 +364,7 @@ export default function Tenders() {
       } finally {
         if (isMounted) {
           setIsLoading(false);
+          setRefreshing(false);
         }
       }
     }
@@ -347,7 +374,7 @@ export default function Tenders() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     let isMounted = true;
@@ -408,33 +435,42 @@ export default function Tenders() {
       const scoreMatches =
         (!filters.minAiScore || tender.aiScore >= minAiScore) &&
         (!filters.maxAiScore || tender.aiScore <= maxAiScore);
+      const daysLeft = daysUntil(tender.deadline);
+      const quickFiltersMatch =
+        (!quickFilters.includes("ai") || tender.aiScore >= 80) &&
+        (!quickFilters.includes("closing") || (daysLeft !== null && daysLeft >= 0 && daysLeft <= 30)) &&
+        (!quickFilters.includes("green") || /solar|renewable|energy|green|sustain/i.test(`${tender.category} ${tender.title}`));
+      const amountMatches =
+        (!valueBand || (valueBand === "under10" && tender.amountValue < 100000000)) &&
+        (valueBand !== "10to50" || (tender.amountValue >= 100000000 && tender.amountValue <= 500000000)) &&
+        (valueBand !== "over50" || tender.amountValue > 500000000);
 
       return (
         matchesText(tender, searchQuery) &&
         (!filters.state || tender.state === filters.state) &&
         (!filters.category || tender.category === filters.category) &&
         (!filters.organization || tender.organization === filters.organization) &&
-        (!filters.status || tender.status === filters.status) &&
+        (!filters.status ||
+          (filters.status === "Closing Soon"
+            ? daysLeft !== null && daysLeft >= 0 && daysLeft <= 30
+            : tender.status === filters.status)) &&
         valueMatches &&
+        amountMatches &&
         scoreMatches &&
+        quickFiltersMatch &&
         isAfterOrSame(tender.publishedDate, filters.publishedDate) &&
         isBeforeOrSame(tender.deadline, filters.deadlineDate)
       );
     });
 
-    return applySort(results, sortBy);
-  }, [allTenders, filters, searchQuery, sortBy]);
+    return applySort(results, "closingSoon");
+  }, [allTenders, filters, quickFilters, searchQuery, valueBand]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredTenders.length / ITEMS_PER_PAGE));
-  const activePage = Math.min(currentPage, totalPages);
-  const paginatedTenders = filteredTenders.slice(
-    (activePage - 1) * ITEMS_PER_PAGE,
-    activePage * ITEMS_PER_PAGE
-  );
+  const recommendedTenders = filteredTenders.slice(0, 2);
+  const feedTenders = filteredTenders.slice(0, FEED_LIMIT);
 
   function handleSearchChange(value) {
     setSearchQuery(value);
-    setCurrentPage(1);
   }
 
   function handleFilterChange(key, value) {
@@ -442,18 +478,24 @@ export default function Tenders() {
       ...currentFilters,
       [key]: value,
     }));
-    setCurrentPage(1);
-  }
-
-  function handleSortChange(value) {
-    setSortBy(value);
-    setCurrentPage(1);
   }
 
   function handleResetFilters() {
     setFilters(initialFilters);
     setSearchQuery("");
-    setCurrentPage(1);
+    setValueBand("");
+    setQuickFilters([]);
+  }
+
+  function toggleQuickFilter(filter) {
+    setQuickFilters((current) => current.includes(filter)
+      ? current.filter((item) => item !== filter)
+      : [...current, filter]);
+  }
+
+  function refreshMarketplace() {
+    setRefreshing(true);
+    setRefreshKey((current) => current + 1);
   }
 
   async function handleToggleSaved(id) {
@@ -482,141 +524,217 @@ export default function Tenders() {
   }
 
   return (
-    <section className="tenders-page">
-      <div className="tenders-shell">
-        <header className="tenders-hero">
-          <div>
-            <span className="tenders-eyebrow">Tender Marketplace</span>
-            <h1>Find high-fit procurement opportunities faster.</h1>
-            <p>
-              Search live tenders, compare AI match signals, and narrow large procurement pipelines into
-              actionable opportunities.
-            </p>
-          </div>
-
-          <div className="tenders-hero__stats" aria-label="Marketplace summary">
-            <article>
-              <strong>{allTenders.length}</strong>
-              <span>Total tenders</span>
-            </article>
-            <article>
-              <strong>{filteredTenders.length}</strong>
-              <span>Matching results</span>
-            </article>
-            <article>
-              <strong>{savedTenderIds.length}</strong>
-              <span>Saved tenders</span>
-            </article>
+    <main className="marketplace-hud">
+      <div className="marketplace-hud__shell">
+        <header className="marketplace-hud__heading">
+          <h1>Marketplace Dashboard</h1>
+          <div className="marketplace-hud__date-actions">
+            <span><CalendarDays size={14} /> {formatMarketplaceDateRange()}</span>
+            <button type="button" onClick={refreshMarketplace} disabled={refreshing} aria-label="Refresh marketplace tenders">
+              <RefreshCw size={14} className={refreshing ? "is-spinning" : ""} />
+              {refreshing ? "Refreshing" : "Refresh"}
+            </button>
           </div>
         </header>
 
-        <div className="tenders-toolbar">
-          <label className="tenders-search" htmlFor="tender-search">
-            <Search size={19} />
+        <section className="marketplace-hud__filters" aria-label="Marketplace filters">
+          <label className="marketplace-hud__search">
+            <Search size={14} />
             <input
-              id="tender-search"
               type="search"
-              placeholder="Search by title, organization, or keyword"
+              placeholder="Search by title, agency..."
               value={searchQuery}
               onChange={(event) => handleSearchChange(event.target.value)}
+              aria-label="Search by title or agency"
             />
           </label>
-
-          <div className="tenders-toolbar__actions">
-            <button className="tenders-filter-toggle" type="button" onClick={() => setIsFilterOpen(true)}>
-              <SlidersHorizontal size={18} />
-              Filters
+          <label>
+            <span className="marketplace-hud__sr-only">Sector</span>
+            <select value={filters.category} onChange={(event) => handleFilterChange("category", event.target.value)}>
+              <option value="">Sector</option>
+              {options.categories.map((category) => <option key={category} value={category}>{category}</option>)}
+            </select>
+          </label>
+          <label>
+            <span className="marketplace-hud__sr-only">Value</span>
+            <select value={valueBand} onChange={(event) => setValueBand(event.target.value)}>
+              <option value="">Value</option>
+              <option value="under10">Under ₹10 Cr</option>
+              <option value="10to50">₹10–50 Cr</option>
+              <option value="over50">Over ₹50 Cr</option>
+            </select>
+          </label>
+          <label>
+            <span className="marketplace-hud__sr-only">Status</span>
+            <select value={filters.status} onChange={(event) => handleFilterChange("status", event.target.value)}>
+              <option value="">Status</option>
+              {options.statuses.map((status) => <option key={status} value={status}>{status}</option>)}
+              {!options.statuses.includes("Closing Soon") && <option value="Closing Soon">Closing Soon</option>}
+            </select>
+          </label>
+          <button
+            className={`marketplace-hud__toggle${filters.minAiScore === "80" ? " is-on" : ""}`}
+            type="button"
+            role="switch"
+            aria-checked={filters.minAiScore === "80"}
+            onClick={() => handleFilterChange("minAiScore", filters.minAiScore === "80" ? "" : "80")}
+          >
+            AI Match Score <i />
+          </button>
+          <button className="marketplace-hud__advanced" type="button" onClick={() => setIsFilterOpen(true)}>
+            <Settings2 size={14} /> Advanced Filters
+          </button>
+          <div className="marketplace-hud__quick-filters">
+            <button type="button" className={quickFilters.includes("ai") ? "is-active" : ""} onClick={() => toggleQuickFilter("ai")}>
+              <Zap size={12} /> AI Recommended
             </button>
-            <button
-              className="tenders-tablet-toggle"
-              type="button"
-              onClick={() => setIsTabletFilterOpen((isOpen) => !isOpen)}
-            >
-              <Filter size={18} />
-              {isTabletFilterOpen ? "Hide filters" : "Show filters"}
+            <button type="button" className={quickFilters.includes("closing") ? "is-active" : ""} onClick={() => toggleQuickFilter("closing")}>
+              <Clock3 size={12} /> Closing Soon
             </button>
-
-            <label className="tenders-sort" htmlFor="tender-sort">
-              <ArrowDownUp size={17} />
-              <select id="tender-sort" value={sortBy} onChange={(event) => handleSortChange(event.target.value)}>
-                {sortOptions.map((option) => (
-                  <option value={option.value} key={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <button type="button" className={quickFilters.includes("green") ? "is-active" : ""} onClick={() => toggleQuickFilter("green")}>
+              <Leaf size={12} /> Green Energy
+            </button>
           </div>
-        </div>
+        </section>
 
-        {error ? (
-          <div className="tenders-alert" role="status">
-            <AlertCircle size={18} />
-            {error}
+        {(error || saveStatus) && (
+          <div className={`marketplace-hud__notice${error ? " is-error" : ""}`} role="status">
+            <AlertCircle size={14} /> {error || saveStatus}
           </div>
-        ) : null}
-        {saveStatus ? (
-          <div className="tenders-alert" role="status">
-            <BookmarkCheck size={18} />
-            {saveStatus}
-          </div>
-        ) : null}
+        )}
 
-        <div className="tenders-layout">
-          <div className={isTabletFilterOpen ? "tenders-sidebar" : "tenders-sidebar tenders-sidebar--collapsed"}>
-            <FilterPanel
-              filters={filters}
-              options={options}
-              onFilterChange={handleFilterChange}
-              onReset={handleResetFilters}
-              onClose={() => setIsFilterOpen(false)}
-            />
+        <section className="marketplace-hud__recommendations">
+          <div className="marketplace-hud__section-title">
+            <h2>Recommended For You</h2>
+            <span>{filteredTenders.length} matching tenders</span>
           </div>
-
-          <main className="tenders-results">
-            <div className="tenders-results__head">
-              <div>
-                <span>
-                  <Calendar size={16} />
-                  12 per page
-                </span>
-                <strong>
-                  Showing {paginatedTenders.length ? (activePage - 1) * ITEMS_PER_PAGE + 1 : 0}-
-                  {Math.min(activePage * ITEMS_PER_PAGE, filteredTenders.length)} of {filteredTenders.length}
-                </strong>
-              </div>
+          {isLoading ? (
+            <div className="marketplace-hud__loading">Loading live tender recommendations…</div>
+          ) : recommendedTenders.length ? (
+            <div className="marketplace-hud__recommendation-grid">
+              {recommendedTenders.map((tender, index) => {
+                const score = Math.round(tender.aiScore || 0);
+                const remaining = daysUntil(tender.deadline);
+                const isSaved = savedTenderIds.includes(String(tender.id));
+                return (
+                  <article className={`marketplace-recommendation${index === 0 ? " is-featured" : ""}`} key={tender.id}>
+                    <div className="marketplace-recommendation__main">
+                      {index === 0 ? (
+                        <div className="marketplace-recommendation__score-ring" style={{ "--match-score": `${score}%` }}>
+                          <strong>{score}%</strong><small>Match</small>
+                        </div>
+                      ) : (
+                        <div className="marketplace-recommendation__score-ring is-secondary" style={{ "--match-score": `${score}%` }}>
+                          <strong>{score}%</strong><small>Match</small>
+                        </div>
+                      )}
+                      <div className="marketplace-recommendation__details">
+                        <div className="marketplace-recommendation__title-row">
+                          <h3>{tender.title}</h3>
+                          <span className={`marketplace-status is-${getMarketplaceStatus(tender).toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>{getMarketplaceStatus(tender)}</span>
+                        </div>
+                        <p>{formatValue(tender)} <i /> {tender.organization} <i /> {tender.location}</p>
+                        <div className="marketplace-recommendation__chips">
+                          <span>{tender.category}</span>
+                          <span>{tender.buyerType || "Government"}</span>
+                          <span>{tender.referenceNo}</span>
+                        </div>
+                        <div className="marketplace-recommendation__metrics">
+                          <span><strong>{score}%</strong> Match Score</span>
+                          <span><strong>{Array.isArray(tender.eligibility) ? tender.eligibility.length : 0}</strong> Eligibility Criteria</span>
+                          <span><strong>{remaining === null ? "—" : remaining < 0 ? "Closed" : `${remaining} Days`}</strong> to Close</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="marketplace-recommendation__timeline">
+                      <i style={{ "--timeline-progress": `${Math.max(6, Math.min(100, remaining === null || remaining < 0 ? 18 : 100 - remaining))}%` }} />
+                    </div>
+                    <div className="marketplace-recommendation__footer">
+                      <span><Check size={12} /> {tender.eligibility?.length ? "Eligibility criteria listed" : "Review eligibility details"}</span>
+                      <span><Clock3 size={12} /> {formatClosingDate(tender.deadline)}</span>
+                      <button
+                        type="button"
+                        className={isSaved ? "is-saved" : ""}
+                        aria-label={isSaved ? "Remove saved tender" : "Save tender"}
+                        onClick={() => handleToggleSaved(tender.id)}
+                      >
+                        <BookmarkCheck size={13} />
+                      </button>
+                      <Link to={`/tenders/${tender.id}`} className={index === 0 ? "marketplace-action is-primary" : "marketplace-action"}>
+                        {index === 0 ? "Analyze with AI" : "Prepare Bid"} <ArrowUpRight size={13} />
+                      </Link>
+                    </div>
+                    {index === 0 && (
+                      <div className="marketplace-recommendation__hover">
+                        <span><Check size={13} /> Eligibility requirements</span>
+                        <span><Clock3 size={13} /> {formatClosingDate(tender.deadline)}</span>
+                        <span><Sparkles size={13} /> AI match score {score}%</span>
+                        <Link to={`/tenders/${tender.id}`} className="marketplace-action is-primary">
+                          Analyze with AI <ArrowUpRight size={13} />
+                        </Link>
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
             </div>
+          ) : (
+            <div className="marketplace-hud__empty">No live tenders match these filters. Adjust the filters or reset them.</div>
+          )}
+        </section>
 
-            {isLoading ? <SkeletonGrid /> : null}
-
-            {!isLoading && paginatedTenders.length ? (
-              <div className="tenders-grid">
-                {paginatedTenders.map((tender) => (
-                  <TenderCard
-                    tender={tender}
-                    key={tender.id}
-                    isSaved={savedTenderIds.includes(String(tender.id))}
-                    onToggleSaved={handleToggleSaved}
-                  />
-                ))}
-              </div>
-            ) : null}
-
-            {!isLoading && !paginatedTenders.length ? (
-              <div className="tenders-empty">
-                <Search size={34} />
-                <h2>No tenders match these filters</h2>
-                <p>Try a broader keyword, remove a date constraint, or reset filters to restart discovery.</p>
-                <button className="tenders-reset tenders-reset--center" type="button" onClick={handleResetFilters}>
-                  <RotateCcw size={16} />
-                  Reset filters
-                </button>
-              </div>
-            ) : null}
-
-            <Pagination currentPage={activePage} totalPages={totalPages} onPageChange={setCurrentPage} />
-          </main>
-        </div>
+        <section className="marketplace-hud__feed">
+          <div className="marketplace-hud__section-title">
+            <div><h2>Active Tenders Feed</h2><p>Live opportunities ranked by fit and closing timeline</p></div>
+            <strong>{filteredTenders.length} results</strong>
+          </div>
+          <div className="marketplace-feed-table-wrap">
+            <table className="marketplace-feed-table">
+              <thead>
+                <tr>
+                  <th>Tender Name / ID</th>
+                  <th>Authority</th>
+                  <th>Value</th>
+                  <th>Closing Date</th>
+                  <th>AI Match Score</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {!isLoading && feedTenders.map((tender) => {
+                  const score = Math.round(tender.aiScore || 0);
+                  const remaining = daysUntil(tender.deadline);
+                  const statusLabel = getMarketplaceStatus(tender);
+                  const statusClass = statusLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+                  return (
+                    <tr key={tender.id}>
+                      <td>
+                        <Link to={`/tenders/${tender.id}`} className="marketplace-feed-table__name">{tender.title}</Link>
+                        <small>TID: {tender.referenceNo}</small>
+                      </td>
+                      <td><span className={`marketplace-status is-${statusClass}`}>{statusLabel}</span></td>
+                      <td>{formatValue(tender)}</td>
+                      <td>
+                        <div className={`marketplace-deadline${remaining !== null && remaining <= 7 ? " is-urgent" : ""}`}>
+                          <span>{formatClosingDate(tender.deadline)}</span>
+                          <i style={{ "--timeline-progress": `${Math.max(5, Math.min(100, remaining === null || remaining < 0 ? 10 : 100 - remaining))}%` }} />
+                        </div>
+                      </td>
+                      <td><span className={`marketplace-score-pill score-${score >= 85 ? "high" : score >= 70 ? "medium" : "low"}`}>{score}%</span></td>
+                      <td><Link className="marketplace-fast-action" to={`/tenders/${tender.id}`}>Fast AI Analysis <ArrowUpRight size={12} /></Link></td>
+                    </tr>
+                  );
+                })}
+                {isLoading && <tr><td colSpan="6" className="marketplace-feed-table__empty">Loading live tenders…</td></tr>}
+                {!isLoading && !feedTenders.length && <tr><td colSpan="6" className="marketplace-feed-table__empty">No tenders found. Try changing your search or filters.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+          <div className="marketplace-hud__feed-footer">
+            <span>Showing {feedTenders.length} of {filteredTenders.length} matching tenders</span>
+            <button type="button" onClick={handleResetFilters}><RotateCcw size={12} /> Reset Filters</button>
+          </div>
+        </section>
       </div>
 
       <div className={`tenders-drawer${isFilterOpen ? " tenders-drawer--open" : ""}`} aria-hidden={!isFilterOpen}>
@@ -631,6 +749,6 @@ export default function Tenders() {
           />
         </div>
       </div>
-    </section>
+    </main>
   );
 }

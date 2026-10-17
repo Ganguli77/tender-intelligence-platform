@@ -4,27 +4,22 @@ import * as THREE from "three";
 import { feature } from "topojson-client";
 import worldMapData from "world-atlas/countries-110m.json";
 import {
-  Activity,
   ArrowRight,
-  BarChart3,
-  Bell,
   Bookmark,
   CheckCircle2,
   Clock3,
-  FileText,
   Landmark,
   LockKeyhole,
   PlayCircle,
   Search,
   ShieldCheck,
-  Sparkles,
-  Target,
   TrendingUp,
 } from "lucide-react";
 import { getTenders } from "../../api/tenders";
 import { INDIA_MAP_VIEWBOX, INDIA_STATE_GEOMETRY } from "../../data/indiaStateGeometry";
 import { tenders as fallbackTenders } from "../../data/tenders";
 import "./Home.css";
+import "./HomeReference.css";
 
 const trustLogos = [
   "Larsen & Toubro",
@@ -443,14 +438,6 @@ function getTenderState(tender = {}) {
   return parts.at(-1) || "Not specified";
 }
 
-function getHeatLevel(count, maxCount) {
-  if (!count) return "none";
-  if (count === maxCount) return "hot";
-  if (count >= Math.max(2, maxCount * 0.55)) return "high";
-  if (count >= Math.max(1, maxCount * 0.28)) return "medium";
-  return "low";
-}
-
 function hasStoredAuthToken() {
   if (typeof window === "undefined") return false;
 
@@ -483,7 +470,7 @@ function useRevealOnScroll() {
   }, []);
 }
 
-function LightAIGlobe3D() {
+export function LightAIGlobe3D() {
   const canvasRef = useRef(null);
   const stageRef = useRef(null);
 
@@ -930,94 +917,55 @@ function LightAIGlobe3D() {
   );
 }
 
-function AIGlobeIllustration() {
+function IndiaMapIllustration() {
+  const signalStates = INDIA_STATE_GEOMETRY.filter(({ name }) =>
+    ["Delhi", "Maharashtra", "Karnataka", "Tamil Nadu", "Telangana", "West Bengal", "Uttar Pradesh"].includes(name),
+  );
+
   return (
-    <div className="home-globe-shell" aria-label="AI tender intelligence globe illustration">
-      <div className="home-globe-orbit home-globe-orbit--outer" />
-
-      <LightAIGlobe3D />
-
-      <div className="home-hero-dashboard" aria-label="NexTender AI dashboard preview">
-        <div className="home-hero-dashboard__top">
-          <div>
-            <span>NexTender AI</span>
-            <strong>Tender Intelligence Dashboard</strong>
-          </div>
-          <div className="home-dashboard-icons">
-            <i />
-            <i />
-          </div>
-        </div>
-
-        <div className="home-dashboard-search">
-          <Search size={14} />
-          <span>Search tender intelligence...</span>
-        </div>
-
-        <div className="home-dashboard-stats">
-          <article>
-            <FileText size={17} />
-            <span>Recent Tender</span>
-            <strong>Metro Depot AI Surveillance</strong>
-            <small>Delhi Infrastructure Board</small>
-          </article>
-          <article>
-            <Target size={17} />
-            <span>AI Match</span>
-            <strong>94%</strong>
-            <small>Excellent opportunity</small>
-          </article>
-          <article>
-            <Bell size={17} />
-            <span>Notifications</span>
-            <strong>12</strong>
-            <small>New matches today</small>
-          </article>
-        </div>
-
-        <div className="home-dashboard-body">
-          <div className="home-dashboard-chart">
-            <div>
-              <span>
-                <BarChart3 size={15} />
-                Analytics Chart
-              </span>
-              <strong>Pipeline Value</strong>
-            </div>
-            <div className="home-dashboard-bars" aria-hidden="true">
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-            </div>
-          </div>
-
-          <div className="home-dashboard-timeline">
-            <span>Mini Activity Timeline</span>
-            <ol>
-              <li>
-                <i />
-                <span>AI scored 18 tenders</span>
-              </li>
-              <li>
-                <i />
-                <span>3 deadlines approaching</span>
-              </li>
-              <li>
-                <i />
-                <span>New PSU tender detected</span>
-              </li>
-            </ol>
-          </div>
-        </div>
+    <div className="home-globe-shell home-india-hero-shell">
+      <div className="home-india-hero-label">
+        <span />
+        AI TENDER NETWORK
+        <strong>INDIA</strong>
       </div>
+      <svg
+        className="home-india-hero-map"
+        viewBox={INDIA_MAP_VIEWBOX}
+        role="img"
+        aria-label="Glowing map of India with tender activity signals"
+      >
+        <defs>
+          <linearGradient id="india-map-fill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#23d8df" />
+            <stop offset="48%" stopColor="#2688f6" />
+            <stop offset="100%" stopColor="#7457ef" />
+          </linearGradient>
+          <linearGradient id="india-map-edge" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#b5ffff" />
+            <stop offset="100%" stopColor="#8d7bff" />
+          </linearGradient>
+          <filter id="india-map-glow" x="-60%" y="-40%" width="220%" height="180%">
+            <feGaussianBlur stdDeviation="12" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+        <g className="home-india-hero-regions">
+          {INDIA_STATE_GEOMETRY.map((state) => (
+            <path key={state.name} d={state.path} />
+          ))}
+        </g>
+        <g className="home-india-hero-signals" aria-hidden="true">
+          {signalStates.map((state) => (
+            <circle key={state.name} cx={state.centroid[0]} cy={state.centroid[1]} r="5" />
+          ))}
+        </g>
+      </svg>
 
       <article className="home-floating-card home-floating-card--score">
-        <span>AI Match Score</span>
+        <span>Live AI Bid Score</span>
         <strong>94%</strong>
-        <small>Excellent Match</small>
+        <small>Excellent match</small>
         <div className="home-score-sparkline" aria-hidden="true">
           <i />
           <TrendingUp size={28} />
@@ -1025,44 +973,30 @@ function AIGlobeIllustration() {
       </article>
 
       <article className="home-floating-card home-floating-card--alert">
-        <div className="home-alert-icon">
-          <Bell size={22} />
-        </div>
         <div>
-          <span>Tender Alert</span>
-          <strong>12 New Opportunities</strong>
-          <small>High-value matches</small>
+          <span>₹18.4 Cr</span>
+          <strong>Tender Matched</strong>
+          <small>AI recommendation</small>
           <Link to="/tenders">
-            View All
+            View tender
             <ArrowRight size={14} />
           </Link>
         </div>
       </article>
 
       <article className="home-floating-card home-floating-card--analytics">
-        <span>INR 48 Cr</span>
-        <strong>Infrastructure Tender</strong>
-        <small>Closing in 3 Days</small>
+        <span>Active Tenders</span>
+        <strong>10,000+</strong>
+        <small>Across India</small>
         <div className="home-card-icon home-card-icon--clock">
           <Clock3 size={18} />
-        </div>
-      </article>
-
-      <article className="home-floating-card home-floating-card--signal">
-        <Activity size={18} />
-        <span>Opportunity Score</span>
-        <strong>92</strong>
-        <small>High Success Probability</small>
-        <div className="home-signal-progress" aria-hidden="true">
-          <i />
         </div>
       </article>
     </div>
   );
 }
 
-function IndiaHeatmap() {
-  const [activeState, setActiveState] = useState("Maharashtra");
+function IndiaActivitySummary() {
   const [mapTenders, setMapTenders] = useState(fallbackTenders);
   const [isUsingLiveData, setIsUsingLiveData] = useState(false);
 
@@ -1092,162 +1026,71 @@ function IndiaHeatmap() {
     };
   }, []);
 
-  const stateCards = useMemo(() => {
+  const stateActivity = useMemo(() => {
     const tendersByState = mapTenders.reduce((grouped, tender) => {
       const state = getTenderState(tender);
-      if (!grouped.has(state)) grouped.set(state, []);
-      grouped.get(state).push(tender);
+      grouped.set(state, (grouped.get(state) || 0) + 1);
       return grouped;
     }, new Map());
 
-    const maxCount = Math.max(...Array.from(tendersByState.values()).map((items) => items.length), 1);
+    const topStates = [...tendersByState.entries()]
+      .filter(([name]) => name !== "Not specified")
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+      .slice(0, 5);
+    const activeStates = [...tendersByState.keys()].filter((name) => name !== "Not specified").length;
+    const pipelineValue = mapTenders.reduce((sum, tender) => sum + Number(tender.amountValue || 0), 0);
 
-    return INDIA_STATE_GEOMETRY.map((state) => {
-      const stateTenders = tendersByState.get(state.name) || [];
-      const totalValue = stateTenders.reduce((sum, tender) => sum + Number(tender.amountValue || 0), 0);
-      const categoryCounts = stateTenders.reduce((counts, tender) => {
-        const category = tender.category || "General";
-        counts.set(category, (counts.get(category) || 0) + 1);
-        return counts;
-      }, new Map());
-      const topCategory = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || "No active tender";
-
-      return {
-        ...state,
-        count: stateTenders.length,
-        totalValue,
-        tenders: stateTenders,
-        topCategory,
-        heat: getHeatLevel(stateTenders.length, maxCount),
-      };
-    });
+    return { topStates, activeStates, pipelineValue };
   }, [mapTenders]);
 
-  const selectedState = stateCards.find((state) => state.name === activeState) || stateCards.find((state) => state.count > 0) || stateCards[0];
-  const topStates = [...stateCards].filter((state) => state.count > 0).sort((a, b) => b.count - a.count).slice(0, 4);
-  const nationalSummary = stateCards.reduce(
-    (summary, state) => ({
-      tenders: summary.tenders + state.count,
-      value: summary.value + state.totalValue,
-      states: summary.states + (state.count > 0 ? 1 : 0),
-    }),
-    { tenders: 0, value: 0, states: 0 },
-  );
-
-  const handleSelectState = (stateName) => {
-    setActiveState(stateName);
-  };
+  const maxStateCount = stateActivity.topStates[0]?.count || 1;
 
   return (
-    <div className="home-map-card">
-      <div className="home-map-toolbar">
-        <span>{isUsingLiveData ? "Live Tender Density" : "Sample Tender Density"}</span>
+    <div className="home-activity-card">
+      <div className="home-activity-header">
         <div>
-          <i />
-          <i />
-          <i />
+          <span className="home-activity-eyebrow">National overview</span>
+          <h3>Tender activity</h3>
         </div>
+        <span className={`home-activity-status ${isUsingLiveData ? "is-live" : ""}`}>
+          <i />
+          {isUsingLiveData ? "Live data" : "Sample data"}
+        </span>
       </div>
 
-      <div className="home-map-layout">
-        <div className="home-india-map">
-          <svg viewBox={INDIA_MAP_VIEWBOX} role="img" aria-label="Interactive India state tender heatmap">
-            {stateCards.map((state) => {
-              const active = selectedState?.name === state.name;
+      <div className="home-activity-metrics">
+        <article>
+          <span>Tracked tenders</span>
+          <strong>{mapTenders.length.toLocaleString("en-IN")}</strong>
+        </article>
+        <article>
+          <span>States &amp; territories</span>
+          <strong>{stateActivity.activeStates}</strong>
+        </article>
+        <article>
+          <span>Pipeline value</span>
+          <strong>{formatTenderValue(stateActivity.pipelineValue)}</strong>
+        </article>
+      </div>
 
-              return (
-                <g key={state.name}>
-                  <path
-                    className={`home-state home-state--${state.heat} ${active ? "is-active" : ""}`}
-                    d={state.path}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`${state.name}: ${state.count} tenders, ${formatTenderValue(state.totalValue)} total value`}
-                    onFocus={() => handleSelectState(state.name)}
-                    onClick={() => handleSelectState(state.name)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        handleSelectState(state.name);
-                      }
-                    }}
-                  >
-                    <title>{`${state.name}: ${state.count} tenders`}</title>
-                  </path>
-                  {state.count > 0 ? (
-                    <text x={state.centroid[0]} y={state.centroid[1]} className="home-state-count" textAnchor="middle">
-                      {state.count}
-                    </text>
-                  ) : null}
-                </g>
-              );
-            })}
-          </svg>
+      <div className="home-activity-states">
+        <div className="home-activity-states__heading">
+          <h4>Most active regions</h4>
+          <Link to="/tenders">
+            Browse tenders
+            <ArrowRight size={15} />
+          </Link>
         </div>
-
-        <aside className="home-map-details" aria-live="polite">
-          <div className="home-map-summary">
-            <article>
-              <span>India total</span>
-              <strong>{nationalSummary.tenders}</strong>
-            </article>
-            <article>
-              <span>States active</span>
-              <strong>{nationalSummary.states}</strong>
-            </article>
-            <article>
-              <span>Pipeline value</span>
-              <strong>{formatTenderValue(nationalSummary.value)}</strong>
-            </article>
+        {stateActivity.topStates.map((state) => (
+          <div className="home-activity-state" key={state.name}>
+            <span>{state.name}</span>
+            <div aria-hidden="true">
+              <i style={{ width: `${Math.max(8, (state.count / maxStateCount) * 100)}%` }} />
+            </div>
+            <strong>{state.count}</strong>
           </div>
-
-          <div className="home-map-details__head">
-            <span>Selected state</span>
-            <h3>{selectedState?.name || "India"}</h3>
-          </div>
-          <div className="home-map-stats">
-            <article>
-              <span>Tenders</span>
-              <strong>{selectedState?.count || 0}</strong>
-            </article>
-            <article>
-              <span>Total value</span>
-              <strong>{formatTenderValue(selectedState?.totalValue)}</strong>
-            </article>
-            <article>
-              <span>Top category</span>
-              <strong>{selectedState?.topCategory || "No active tender"}</strong>
-            </article>
-          </div>
-
-          <div className="home-map-tender-list">
-            {(selectedState?.tenders || []).slice(0, 4).map((tender) => (
-              <Link to={`/tenders/${tender.id}`} key={tender.id} className="home-map-tender">
-                <span>{tender.category}</span>
-                <strong>{tender.title}</strong>
-                <small>{tender.organization}</small>
-                <i>{tender.amount || formatTenderValue(tender.amountValue)}</i>
-              </Link>
-            ))}
-            {selectedState?.count ? null : (
-              <p>No sample tenders are currently tagged to this state.</p>
-            )}
-          </div>
-
-          <div className="home-map-top-states">
-            {topStates.map((state) => (
-              <button
-                type="button"
-                className={selectedState?.name === state.name ? "is-active" : ""}
-                key={state.name}
-                onClick={() => handleSelectState(state.name)}
-              >
-                <span>{state.name}</span>
-                <strong>{state.count}</strong>
-              </button>
-            ))}
-          </div>
-        </aside>
+        ))}
       </div>
     </div>
   );
@@ -1301,28 +1144,16 @@ export default function Home() {
     <div className="home-page">
       <section className="home-hero home-reveal">
         <div className="home-hero__content">
-          <div className="home-hero-badges">
-            <span className="home-kicker">
-              <Sparkles size={15} />
-              Enterprise AI Tender Platform
-            </span>
-            <span className="home-kicker home-kicker--secondary">
-              <Sparkles size={15} />
-              AI <b>|</b> Smart Matching <b>|</b> Predictive Analytics
-            </span>
-          </div>
           <h1>
-            AI-Powered
+            AI-Powered Tender
             <br />
-            Tender Intelligence
+            Intelligence for
             <br />
-            for <span>Modern</span>
-            <br />
-            Businesses
+            <span>Modern</span> Businesses
           </h1>
           <p>
-            Discover, analyze and win Government & Private tenders with AI-powered opportunity scoring, predictive
-            analytics, intelligent recommendations and real-time monitoring.
+            Discover, analyze, and win Government &amp; Private tenders with AI-powered opportunity scoring, predictive
+            analytics, intelligent recommendations, and real-time monitoring.
           </p>
           <div className="home-actions">
             <Link className="home-button home-button--primary" to="/tenders">
@@ -1356,7 +1187,7 @@ export default function Home() {
           </div>
         </div>
 
-        <AIGlobeIllustration />
+        <IndiaMapIllustration />
 
         <div className="home-logo-strip" aria-label="Trusted by leading organizations">
           <span>Trusted by leading organizations</span>
@@ -1366,13 +1197,13 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="home-section home-heatmap home-reveal">
+      <section className="home-section home-heatmap home-activity-section home-reveal">
         <div className="home-section-heading">
-          <span className="home-kicker">India Tender Heatmap</span>
-          <h2>India Tender Activity</h2>
-          <p>Regional procurement momentum, highlighted with live opportunity density across high-volume states.</p>
+          <span className="home-kicker">India-wide coverage</span>
+          <h2>Tender activity across India.</h2>
+          <p>A quick snapshot of tracked opportunities, pipeline value, and the most active regions.</p>
         </div>
-        <IndiaHeatmap />
+        <IndiaActivitySummary />
       </section>
 
       <section id="features" className="home-section home-reveal">
@@ -1522,4 +1353,3 @@ export default function Home() {
     </div>
   );
 }
-

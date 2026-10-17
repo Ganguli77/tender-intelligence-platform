@@ -7,7 +7,7 @@ import { useTheme } from "../../context/ThemeContext";
 
 const publicLinks = [
   { label: "Home", path: "/" },
-  { label: "Features", path: "/#features" },
+  { label: "Dashboard", path: "/dashboard" },
   { label: "Marketplace", path: "/tenders" },
   { label: "AI Insights", path: "/insights" },
   { label: "Pricing", path: "/#pricing" },

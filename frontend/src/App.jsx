@@ -19,7 +19,7 @@ import MyTenders from "./pages/MyTenders";
 import RegisterPage from "./pages/RegisterPage";
 import SavedTenders from "./pages/SavedTenders";
 import TenderDetails from "./pages/TenderDetails";
-import TenderList from "./pages/TenderList";
+import TenderList from "./pages/Tenders/Tenders";
 import UserProfile from "./pages/UserProfile";
 
 function LegacyTenderRedirect() {

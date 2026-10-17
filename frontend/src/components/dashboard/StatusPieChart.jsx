@@ -1,6 +1,6 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
-const colors = ["#6d4cff", "#f59e0b", "#fb4d5d"];
+const colors = ["#17d4cb", "#4b91f4", "#9858e8"];
 
 function TooltipContent({ active, payload }) {
   if (!active || !payload?.length) return null;
@@ -35,16 +35,16 @@ export default function StatusPieChart({ status }) {
             <strong>{status?.activePercentage || 0}%</strong>
             <span>Active</span>
           </div>
-        <ResponsiveContainer width="100%" height={250}>
-          <PieChart>
-            <Pie data={data} dataKey="value" nameKey="name" innerRadius={62} outerRadius={92} paddingAngle={4}>
-              {data.map((entry, index) => (
-                <Cell key={entry.name} fill={colors[index]} />
-              ))}
-            </Pie>
-            <Tooltip content={<TooltipContent />} />
-          </PieChart>
-        </ResponsiveContainer>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={data} dataKey="value" nameKey="name" innerRadius="66%" outerRadius="90%" paddingAngle={4}>
+                {data.map((entry, index) => (
+                  <Cell key={entry.name} fill={colors[index]} />
+                ))}
+              </Pie>
+              <Tooltip content={<TooltipContent />} />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
 
         <div className="dashboard-chart-legend">

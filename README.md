@@ -4,21 +4,24 @@ Full-stack tender intelligence app with a Vite React frontend and Spring Boot ba
 
 ## Run Locally
 
-Backend:
+In VS Code, run **Tasks: Run Task → Start Local App** to start both services in
+separate integrated terminals. The task uses fixed local ports and displays
+startup errors in the terminal that owns each service.
 
-```bash
-cd backend
-mvnw.cmd spring-boot:run
+To start them manually, use separate terminals:
+
+```powershell
+cd backend; powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run-local.ps1
+cd frontend; npm.cmd run dev
 ```
 
-Frontend:
+The frontend is pinned to port `5173` and will report an error if that port is
+already occupied rather than silently switching ports. The backend defaults to
+port `8081`. Local backend runs use a separate persistent database at
+`backend/data/tender-ai-local`; the previous local database is left untouched.
+Stop each service with `Ctrl+C` in its terminal.
 
-```bash
-cd frontend
-npm.cmd run dev
-```
-
-Default URLs:
+Local URLs:
 
 - Frontend: `http://localhost:5173`
 - Backend API: `http://localhost:8081/api`
@@ -62,7 +65,9 @@ The frontend and backend are separate Docker services. The frontend serves the V
 	UPDATE users SET role = 'ADMIN' WHERE email = 'admin@example.com';
 	```
 
-	Keep `OPENAI_API_KEY` optional unless AI features should be enabled. For Google sign-in, set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` on the backend, and set `VITE_GOOGLE_CLIENT_ID` as a frontend build variable before deploying.
+	Keep `OPENAI_API_KEY` optional unless AI features should be enabled. For Google sign-in, create a Web application OAuth client in Google Cloud Console, add the frontend origins to its authorized JavaScript origins, then set `GOOGLE_CLIENT_ID` on the backend and `VITE_GOOGLE_CLIENT_ID` as a frontend build variable.
+
+	Phone OTP sign-in uses Firebase Authentication. In Firebase Console, add a Web app and copy its `apiKey`, `authDomain`, `projectId`, and `appId` into the frontend build variables `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, and `VITE_FIREBASE_APP_ID`. Enable Phone as a sign-in provider under Authentication, configure allowed domains and SMS regions, and set the same web API key as the backend variable `FIREBASE_WEB_API_KEY`. Phone numbers must use E.164 format (for example, `+14155552671`). Do not commit private service-account credentials; Firebase's web API key is a public project identifier, and the backend uses it to validate Firebase phone ID tokens.
 3. Add a frontend service from this repository with its root directory set to `/frontend`. Set `BACKEND_URL` to `http://${{backend.RAILWAY_PRIVATE_DOMAIN}}:${{backend.PORT}}`, using the exact Railway service name `backend`.
 4. Generate a public domain for the frontend service. The frontend service is the public entry point; the backend only needs private networking enabled.
 
