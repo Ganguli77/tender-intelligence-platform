@@ -17,7 +17,7 @@ class SecurityConfigCorsTest {
     private SecurityConfig securityConfig;
 
     @Test
-    void corsConfigurationAllowsLocalhostDevelopmentOrigins() {
+    void corsConfigurationAllowsLocalAndProductionOrigins() {
         CorsConfigurationSource source = securityConfig.corsConfigurationSource();
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setMethod("OPTIONS");
@@ -26,7 +26,16 @@ class SecurityConfigCorsTest {
         CorsConfiguration configuration = source.getCorsConfiguration(request);
 
         assertThat(configuration).isNotNull();
-        assertThat(configuration.getAllowedOriginPatterns()).contains("http://localhost:*", "http://127.0.0.1:*");
+        assertThat(configuration.getAllowedOriginPatterns()).contains(
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173",
+            "https://ideal-surprise-production-7932.up.railway.app",
+            "https://nextender.com",
+            "https://www.nextender.com");
+        assertThat(configuration.checkOrigin("https://ideal-surprise-production-7932.up.railway.app"))
+            .isEqualTo("https://ideal-surprise-production-7932.up.railway.app");
+        assertThat(configuration.checkOrigin("https://nextender.com")).isEqualTo("https://nextender.com");
         assertThat(configuration.getAllowedMethods()).contains("GET", "POST", "PUT", "DELETE", "OPTIONS");
     }
 }

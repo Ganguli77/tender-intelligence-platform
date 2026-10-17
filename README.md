@@ -53,6 +53,7 @@ The frontend and backend are separate Docker services. The frontend serves the V
 	SPRING_JPA_HIBERNATE_DDL_AUTO=update
 	APP_SEED_DATA=false
 	JWT_SECRET=<a unique, randomly generated secret>
+	APP_CORS_ALLOWED_ORIGINS=https://ideal-surprise-production-7932.up.railway.app,https://nextender.com,https://www.nextender.com
 	```
 
 	`APP_SEED_DATA=false` prevents demo accounts and tenders from being created. Public registration always creates a regular user. To provision the first administrator, register the intended account normally, then run this query in Railway's MySQL console, replacing the email with that account's address:
@@ -65,4 +66,4 @@ The frontend and backend are separate Docker services. The frontend serves the V
 3. Add a frontend service from this repository with its root directory set to `/frontend`. Set `BACKEND_URL` to `http://${{backend.RAILWAY_PRIVATE_DOMAIN}}:${{backend.PORT}}`, using the exact Railway service name `backend`.
 4. Generate a public domain for the frontend service. The frontend service is the public entry point; the backend only needs private networking enabled.
 
-Leave `VITE_API_BASE_URL` unset on the frontend service so requests use the same-origin `/api` proxy. Railway supplies `PORT` to both containers. After deployment, verify the frontend domain loads and its login/API requests reach the backend.
+Leave `VITE_API_BASE_URL` unset on the frontend service so requests use the same-origin `/api` proxy. If the API is hosted separately and called directly by the browser, set `VITE_API_BASE_URL` to that API's `/api` URL and add the frontend origin to `APP_CORS_ALLOWED_ORIGINS`. Railway supplies `PORT` to both containers. After deployment, verify the frontend domain loads and its login/API requests reach the backend.
